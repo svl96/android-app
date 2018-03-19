@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="noteColorRed">#f44336</string>
+    <string name="noteColorPink">#e91e63</string>
+    <string name="noteColorPurple">#9c27b0</string>
+    <string name="noteColorBlue">#2196f3</string>
+    <string name="noteColorCyan">#00bcd4</string>
+    <string name="noteColorLime">#cddc39</string>
+    <string name="noteColorAmber">#ffc107</string>
+    <string name="noteColorDeepOrange">#ff5722</string>
+</resources>

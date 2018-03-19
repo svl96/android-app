@@ -4,11 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
-import android.text.Editable
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -21,17 +18,27 @@ class EditActivity : AppCompatActivity() {
     private var editDescription : EditText? = null
     private var saveButton : Button? = null
 
-    private val colorSet : Array<Int> = arrayOf(
-            Color.BLUE,
-            Color.CYAN,
-            Color.MAGENTA,
-            Color.RED,
-            Color.YELLOW
-    )
+    private var colors: Array<Int> = arrayOf()
+
+    private fun setColors() {
+        val colorIds = listOf(
+                R.string.noteColorRed,
+                R.string.noteColorAmber,
+                R.string.noteColorBlue,
+                R.string.noteColorCyan,
+                R.string.noteColorDeepOrange,
+                R.string.noteColorLime,
+                R.string.noteColorPink,
+                R.string.noteColorPurple)
+
+        colors = colorIds.map { id -> Color.parseColor(getString(id)) }.toTypedArray()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit)
+
+        setColors()
 
         this.editTitle = findViewById(R.id.title_edit)
         this.editDescription = findViewById(R.id.description_edit)
@@ -88,10 +95,11 @@ class EditActivity : AppCompatActivity() {
     }
 
     private fun createNote(id: Int): Note {
+        Log.d("colors", colors.contentDeepToString())
         val noteTitle = editTitle?.text.toString()
         val noteDescription = editDescription?.text.toString()
         val noteDate = Calendar.getInstance().time
-        val noteColor = colorSet[Random().nextInt(colorSet.size)]
+        val noteColor = colors[Random().nextInt(colors.size)]
         return Note(id, noteTitle, noteDescription , noteDate, noteColor)
     }
 
