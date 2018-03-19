@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Android Notes</string>
+    <string name="save_button">Save</string>
+    <string name="description_label">Description</string>
+    <string name="title_label">Title</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+        sed do eiusmod tempor incididunt ut labore et doloremagnaaliqua. Ut enim ad minim veniam,
+        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
+</resources>
