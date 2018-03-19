@@ -1,7 +1,6 @@
 package com.yandex.android.androidapp
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -51,6 +50,7 @@ class NotesAdapter(private val _context: Context, private val _notes: Array<Note
     }
 
     private class ViewHolder(view: View?) {
+
         val title: TextView?
         val description: TextView?
         val color: View?

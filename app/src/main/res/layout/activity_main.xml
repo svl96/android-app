@@ -7,10 +7,12 @@
     android:layout_height="match_parent"
     tools:context="com.yandex.android.androidapp.MainActivity">
 
-    <android.support.v7.widget.ListViewCompat
+    <ListView
         android:id="@+id/notes_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:divider="@color/dividerColor"
+        android:dividerHeight="1dp"
         />
 
     <android.support.design.widget.FloatingActionButton
@@ -22,7 +24,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:src="@drawable/ic_plus"
-        android:onClick="createNote"
         />
 
 

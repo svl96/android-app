@@ -10,7 +10,7 @@
 
     <View
         android:id="@+id/item_color"
-        android:layout_width="15dp"
+        android:layout_width="16dp"
         android:layout_height="match_parent"
         android:background="@color/colorAccent"
         />
@@ -28,6 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:text="@string/new_note"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"
             android:gravity="center_vertical"/>
 
@@ -43,6 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="end"
+            android:text="12:00"
             />
 
     </android.support.v7.widget.LinearLayoutCompat>

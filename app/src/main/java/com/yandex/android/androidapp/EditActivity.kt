@@ -43,16 +43,20 @@ class EditActivity : AppCompatActivity() {
             onEditMode()
         }
         else onCreateMode()
-
     }
 
-    private fun updateNote(note: Note){
-        note.title = editTitle?.text.toString()
-        note.description = editDescription?.text.toString()
-        note.datetime = Calendar.getInstance().time
+    private fun sendNote(note: Note) {
+        val intent = Intent().apply {
+            putExtra(EXTRA_NOTE, note)
+        }
+        setResult(Activity.RESULT_OK, intent)
+        finish()
     }
+
+    // region EditNote
 
     private fun onEditMode() {
+        setTitle(R.string.edit_title)
         val note = this.intent.getSerializableExtra(EXTRA_NOTE) as Note
 
         this.editTitle?.setText(note.title, TextView.BufferType.EDITABLE)
@@ -62,18 +66,19 @@ class EditActivity : AppCompatActivity() {
             updateNote(note)
             sendNote(note)
         }
-
     }
 
-    private fun createNote(id: Int): Note {
-        val title = editTitle?.text.toString()
-        val description = editDescription?.text.toString()
-        val date = Calendar.getInstance().time
-        val color = colorSet[Random().nextInt(colorSet.size)]
-        return Note(id, title, description , date, color)
+    private fun updateNote(note: Note){
+        note.title = editTitle?.text.toString()
+        note.description = editDescription?.text.toString()
+        note.datetime = Calendar.getInstance().time
     }
 
+    // endregion
+
+    // region CreateNote
     private fun onCreateMode() {
+        setTitle(R.string.create_title)
         val noteId = intent.getIntExtra(EXTRA_NOTE_ID, 0)
 
         saveButton?.setOnClickListener {
@@ -82,14 +87,16 @@ class EditActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun sendNote(note: Note) {
-        Log.d("send_note_test", note.toString())
-        val intent = Intent().apply {
-            putExtra(EXTRA_NOTE, note)
-        }
-        setResult(Activity.RESULT_OK, intent)
-        finish()
+    private fun createNote(id: Int): Note {
+        val noteTitle = editTitle?.text.toString()
+        val noteDescription = editDescription?.text.toString()
+        val noteDate = Calendar.getInstance().time
+        val noteColor = colorSet[Random().nextInt(colorSet.size)]
+        return Note(id, noteTitle, noteDescription , noteDate, noteColor)
     }
+
+    // endregion
+
+
 
 }
