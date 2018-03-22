@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.ListViewCompat
 import android.util.Log
@@ -41,6 +42,11 @@ class MainActivity : AppCompatActivity() {
 
         _actionButton?.setOnClickListener { v -> createNote(v) }
 
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+        outState?.putSerializable("NOTES", _notes.toTypedArray())
+        super.onSaveInstanceState(outState, outPersistentState)
     }
 
     // region CreateNote
