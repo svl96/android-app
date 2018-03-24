@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -16,8 +17,8 @@ class EditActivity : AppCompatActivity() {
     private var editTitle : EditText? = null
     private var editDescription : EditText? = null
     private var saveButton : Button? = null
-    private var noteColor : Int? = Color.RED
-    private var chooseColorButton: Button? = null
+    private var noteColor : Int = Color.RED
+    private var currentColor : View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +27,11 @@ class EditActivity : AppCompatActivity() {
         editTitle = findViewById(R.id.title_edit)
         editDescription = findViewById(R.id.description_edit)
         saveButton = findViewById(R.id.save_button)
-        chooseColorButton = findViewById(R.id.choose_color_button)
-
+        currentColor = findViewById(R.id.color_view)
 
         val editMode = intent.getBooleanExtra(EXTRA_EDIT_MODE, false)
 
-        chooseColorButton?.setOnClickListener {
+        currentColor?.setOnClickListener {
             onChooseColor()
         }
 
@@ -39,12 +39,11 @@ class EditActivity : AppCompatActivity() {
             onEditMode()
         }
         else onCreateMode()
+        currentColor?.setBackgroundColor(noteColor)
     }
 
     private fun onChooseColor() {
         val outIntent = Intent(this, ColorPickerActivity::class.java)
-        outIntent.putExtra(EXTRA_COLOR, noteColor)
-
         startActivityForResult(outIntent, GET_COLOR_REQUEST)
     }
 
@@ -54,6 +53,8 @@ class EditActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK && requestCode == GET_COLOR_REQUEST &&
                  data != null) {
             noteColor = data.getIntExtra(EXTRA_COLOR, Color.RED)
+            currentColor?.setBackgroundColor(noteColor)
+
         }
     }
 
@@ -74,6 +75,8 @@ class EditActivity : AppCompatActivity() {
         this.editTitle?.setText(note.title, TextView.BufferType.EDITABLE)
         this.editDescription?.setText(note.description, TextView.BufferType.EDITABLE)
 
+        noteColor = note.color
+
         saveButton?.setOnClickListener {
             updateNote(note)
             sendNote(note)
@@ -84,7 +87,9 @@ class EditActivity : AppCompatActivity() {
         note.title = editTitle?.text.toString()
         note.description = editDescription?.text.toString()
         note.datetime = Calendar.getInstance().time
-        note.color = noteColor ?: note.color
+        note.color = noteColor
+
+
     }
 
     // endregion

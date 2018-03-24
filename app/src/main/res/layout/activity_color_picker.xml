@@ -9,7 +9,7 @@
         android:id="@+id/current_color_view"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:background="@drawable/color_rect"
+        android:background="@color/colorAccent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -20,7 +20,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="40dp"
-        android:textSize="25dp"
+        android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/current_color_view"
         app:layout_constraintTop_toBottomOf="@+id/text_rgb"
@@ -33,7 +33,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
-        android:textSize="25dp"
+        android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/current_color_view"
         app:layout_constraintTop_toTopOf="parent"
@@ -56,14 +56,6 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal">
-
-            <view
-                android:layout_width="100dp"
-                android:layout_height="100dp" />
-
-            <View
-                android:layout_width="100dp"
-                android:layout_height="100dp" />
 
         </LinearLayout>
     </HorizontalScrollView>

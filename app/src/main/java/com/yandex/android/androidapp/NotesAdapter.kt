@@ -8,9 +8,11 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
-class NotesAdapter(private val _context: Context, private val _notes: Array<Note>) : BaseAdapter() {
+class NotesAdapter(private val _context: Context, private val _notes: ArrayList<Note>)
+    : BaseAdapter() {
 
     override fun getItem(p0: Int): Any {
         return _notes[p0]

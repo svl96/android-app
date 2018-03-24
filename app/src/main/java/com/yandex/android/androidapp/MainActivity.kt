@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton
 import android.util.Log
 import android.view.View
 import android.widget.*
+import java.util.ArrayList
 
 const val EXTRA_NOTE : String = "com.yandex.android.EXTRA_NOTE"
 const val EXTRA_EDIT_MODE : String = "com.yandex.android.EXTRA_EDIT_MODE"
@@ -20,21 +21,28 @@ const val GET_COLOR_REQUEST : Int = 3
 
 class MainActivity : AppCompatActivity() {
 
-    private var _notes : MutableList<Note> = mutableListOf()
+    private var _notes : ArrayList<Note> = arrayListOf()
     private var _notesAdapter : NotesAdapter? = null
     private var _listView: ListView? = null
     private var _actionButton: FloatingActionButton? = null
+
+    val tag = "MainActivity"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val savedNotes = savedInstanceState?.getSerializable("NOTES") as ArrayList<*>?
+        savedNotes?.mapTo(_notes, { s -> s as Note })
+
+        Log.d(tag, "onCreate()")
+        Log.d(tag, (savedNotes == null).toString())
 
         _listView = findViewById(R.id.notes_list)
         _actionButton = findViewById(R.id.FAB1)
 
-        _notesAdapter = NotesAdapter(this, _notes.toTypedArray())
+        _notesAdapter = NotesAdapter(this, _notes)
         _listView?.adapter = _notesAdapter
 
         _listView?.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
@@ -45,9 +53,11 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
-        outState?.putSerializable("NOTES", _notes.toTypedArray())
-        super.onSaveInstanceState(outState, outPersistentState)
+    override fun onSaveInstanceState(outState: Bundle?) {
+        Log.d(tag, "onSaveInstantState()")
+
+        outState?.putSerializable("NOTES", _notes)
+        super.onSaveInstanceState(outState)
     }
 
     // region CreateNote
@@ -63,9 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addNoteItem(note: Note) {
         _notes.add(note)
-        _notesAdapter = NotesAdapter(this, _notes.toTypedArray())
-        _listView?.adapter = _notesAdapter
-
+        _notesAdapter?.notifyDataSetChanged()
     }
 
     // endregion
@@ -83,8 +91,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateNoteItem(note: Note) {
         val position = note.id
         _notes[position] = note
-        _notesAdapter = NotesAdapter(this, _notes.toTypedArray())
-        _listView?.adapter = _notesAdapter
+        _notesAdapter?.notifyDataSetChanged()
     }
 
     // endregion

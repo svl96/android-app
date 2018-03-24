@@ -1,5 +1,7 @@
 package com.yandex.android.androidapp
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
@@ -8,9 +10,9 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.util.TypedValue
+import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 
 
@@ -22,29 +24,67 @@ class ColorPickerActivity : AppCompatActivity() {
 
     private var currentColorValue : Int? = null
 
+    private val squareSideDP : Int = 50
+
+    private val tag = "ColorPikerActivity"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_color_picker)
+
+        Log.d(tag, "onCreate()")
 
         currentColorView = findViewById(R.id.current_color_view)
         hsvTextView = findViewById(R.id.text_hsv)
         rgbTextView = findViewById(R.id.text_rgb)
 
-        val currentColorValue = intent.getIntExtra(EXTRA_COLOR, Color.RED)
-        val shape = currentColorView?.background as ShapeDrawable
-        shape.paint.color = currentColorValue
-
-        val colorDrawable = currentColorView?.background as GradientDrawable
-
-        val colorScroll = findViewById<ScrollView>(R.id.color_scrollview)
-        val drawable = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
-        intArrayOf(Color.RED, Color.YELLOW, Color.GREEN,
-                Color.CYAN, Color.BLUE, Color.MAGENTA, Color.RED))
-
-        drawable.shape = GradientDrawable.RECTANGLE
-        colorScroll.background = drawable
+        currentColorValue = intent.getIntExtra(EXTRA_COLOR, R.color.colorAccent)
+        currentColorView?.setBackgroundColor(currentColorValue!!)
 
         drawGrad()
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent().apply {
+            putExtra(EXTRA_COLOR, currentColorValue)
+        }
+        Log.d(tag, "onBackPressed")
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        Log.d(tag, "onOptionItemSelected")
+        Log.d(tag, item?.itemId.toString())
+        if (item?.itemId == R.id.parent)
+        {
+            Log.d(tag, "parentId")
+        } else if (item?.itemId == R.id.home) {
+            Log.d(tag, "homeId")
+        }
+        onBackPressed()
+        return true
+    }
+
+    // region Draw Gradient Scroll
+
+    private fun drawGrad() {
+        val scrollLayout = findViewById<LinearLayout>(R.id.scroll_layout)
+        val drawable = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
+                getHSVGradientColors(60))
+        drawable.shape = GradientDrawable.RECTANGLE
+        scrollLayout.background = drawable
+
+        val squareCount = 16
+        val squareMarginDP : Int = squareSideDP/2
+        val hueValues = calcHueValues(squareCount, squareSideDP, squareMarginDP)
+
+        for (i in 1..squareCount) {
+            val hsvColorBright = Color.HSVToColor(floatArrayOf(hueValues[i-1].toFloat(), 1F, .95F))
+            scrollLayout.addView(createRectView(hsvColorBright))
+        }
+
     }
 
     private fun getHSVGradientColors(hueStep : Int) : IntArray {
@@ -57,27 +97,6 @@ class ColorPickerActivity : AppCompatActivity() {
         }
 
         return colorsList.toIntArray()
-    }
-
-
-    private fun drawGrad() {
-        val colorView = findViewById<View>(R.id.test_gradient_view)
-        val scrollLayout = findViewById<LinearLayout>(R.id.scroll_layout)
-        val drawable = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
-                getHSVGradientColors(60))
-        drawable.shape = GradientDrawable.RECTANGLE
-        scrollLayout.background = drawable
-
-        val squareCount = 16
-        val squareWidthDP = 50
-        val squareMarginDP : Int = squareWidthDP/2
-        val hueValues = calcHueValues(squareCount, squareWidthDP, squareMarginDP)
-
-        for (i in 1..squareCount) {
-            val hsvColorBright = Color.HSVToColor(floatArrayOf(hueValues[i-1].toFloat(), 1F, .95F))
-
-            scrollLayout.addView(createRectView(hsvColorBright))
-        }
     }
 
     private fun calcHueValues(squareCount : Int, widthDP : Int, marginDP : Int ) : Array<Double> {
@@ -95,31 +114,26 @@ class ColorPickerActivity : AppCompatActivity() {
         return outHueValues.toTypedArray()
     }
 
-    private fun setUpCurrentColorView(color: Int) {
-        currentColorValue = color
-        currentColorView?.setBackgroundColor(color)
-    }
+    // endregion
 
     private fun createRectView(color : Int) : View {
         val outRect = View(this)
         val layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT)
-
         val displayMetrics = resources.displayMetrics
 
-        layoutParams.width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                50F, displayMetrics).toInt()
+        val typedSquareSide = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                squareSideDP.toFloat(), displayMetrics).toInt()
+        val typedSquareMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                squareSideDP.toFloat() / 2, displayMetrics).toInt()
 
-        layoutParams.height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                50F, displayMetrics).toInt()
+        layoutParams.width =  typedSquareSide
+        layoutParams.height = typedSquareSide
 
-        val typedMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                25F, displayMetrics).toInt()
-
-        layoutParams.marginStart = typedMargin
-        layoutParams.marginEnd = typedMargin
-        layoutParams.topMargin = typedMargin
-        layoutParams.bottomMargin = typedMargin
+        layoutParams.marginStart = typedSquareMargin
+        layoutParams.marginEnd = typedSquareMargin
+        layoutParams.topMargin = typedSquareMargin
+        layoutParams.bottomMargin = typedSquareMargin
 
         outRect.layoutParams = layoutParams
         outRect.setBackgroundColor(color)
@@ -132,6 +146,11 @@ class ColorPickerActivity : AppCompatActivity() {
         }
 
         return outRect
+    }
+
+    private fun setUpCurrentColorView(color: Int) {
+        currentColorValue = color
+        currentColorView?.setBackgroundColor(color)
     }
 
 }
