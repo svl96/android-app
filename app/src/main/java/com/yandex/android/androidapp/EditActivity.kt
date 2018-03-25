@@ -5,6 +5,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -16,9 +18,10 @@ class EditActivity : AppCompatActivity() {
 
     private var editTitle : EditText? = null
     private var editDescription : EditText? = null
-    private var saveButton : Button? = null
     private var noteColor : Int = Color.RED
     private var currentColor : View? = null
+    private var saveNote : () -> Unit = {}
+    private var note : Note? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +29,6 @@ class EditActivity : AppCompatActivity() {
 
         editTitle = findViewById(R.id.title_edit)
         editDescription = findViewById(R.id.description_edit)
-        saveButton = findViewById(R.id.save_button)
         currentColor = findViewById(R.id.color_view)
 
         val editMode = intent.getBooleanExtra(EXTRA_EDIT_MODE, false)
@@ -42,8 +44,37 @@ class EditActivity : AppCompatActivity() {
         currentColor?.setBackgroundColor(noteColor)
     }
 
+    private fun sendNote() {
+        val intent = Intent().apply {
+            putExtra(EXTRA_NOTE, note)
+        }
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+    }
+
+    // region Setup Menu
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.save_button, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item?.itemId == R.id.save_note_action) {
+            saveNote()
+            sendNote()
+        }
+        return true
+    }
+
+    // endregion
+
+    // region Choose Color
+
     private fun onChooseColor() {
-        val outIntent = Intent(this, ColorPickerActivity::class.java)
+        val outIntent = Intent(this, ColorPickerActivity::class.java).apply {
+            putExtra(EXTRA_COLOR, noteColor)
+        }
         startActivityForResult(outIntent, GET_COLOR_REQUEST)
     }
 
@@ -58,56 +89,46 @@ class EditActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendNote(note: Note) {
-        val intent = Intent().apply {
-            putExtra(EXTRA_NOTE, note)
-        }
-        setResult(Activity.RESULT_OK, intent)
-        finish()
-    }
+    // endregion
 
-    // region EditNote
+    // region Edit Note
 
     private fun onEditMode() {
         setTitle(R.string.edit_title)
-        val note = this.intent.getSerializableExtra(EXTRA_NOTE) as Note
+        note = this.intent.getSerializableExtra(EXTRA_NOTE) as Note
 
-        this.editTitle?.setText(note.title, TextView.BufferType.EDITABLE)
-        this.editDescription?.setText(note.description, TextView.BufferType.EDITABLE)
+        this.editTitle?.setText(note?.title, TextView.BufferType.EDITABLE)
+        this.editDescription?.setText(note?.description, TextView.BufferType.EDITABLE)
 
-        noteColor = note.color
+        noteColor = note?.color ?: Color.RED
 
-        saveButton?.setOnClickListener {
-            updateNote(note)
-            sendNote(note)
-        }
+        saveNote = {updateNote()}
+
     }
 
-    private fun updateNote(note: Note){
-        note.title = editTitle?.text.toString()
-        note.description = editDescription?.text.toString()
-        note.datetime = Calendar.getInstance().time
-        note.color = noteColor
+    private fun updateNote(){
+        note?.title = editTitle?.text.toString()
+        note?.description = editDescription?.text.toString()
+        note?.datetime = Calendar.getInstance().time
+        note?.color = noteColor
     }
 
     // endregion
 
-    // region CreateNote
+    // region Create Note
+
     private fun onCreateMode() {
         setTitle(R.string.create_title)
-        saveButton?.setOnClickListener {
-            val note = createNote()
-            sendNote(note)
-        }
+        saveNote = {createNote()}
     }
 
-    private fun createNote(): Note {
+    private fun createNote() {
         val uniqueID = UUID.randomUUID().toString()
         val noteTitle = editTitle?.text.toString()
         val noteDescription = editDescription?.text.toString()
         val noteDate = Calendar.getInstance().time
         val noteColor = noteColor
-        return Note(uniqueID, noteTitle, noteDescription , noteDate, noteColor)
+        note = Note(uniqueID, noteTitle, noteDescription , noteDate, noteColor)
     }
 
     // endregion

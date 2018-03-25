@@ -26,8 +26,6 @@ class MainActivity : AppCompatActivity() {
     private var _notesAdapter : NotesAdapter? = null
     private var _listView: ListView? = null
     private var _actionButton: FloatingActionButton? = null
-    private val deleteDialog: Dialog? = null
-
     private val tag = "MainActivity"
 
     // region Setup Activity
@@ -78,24 +76,11 @@ class MainActivity : AppCompatActivity() {
         _listView?.setOnItemLongClickListener { _, _, position: Int, _ ->
             onItemLongClick(position)
         }
-
-    }
-
-    private fun createDeleteDialog(position: Int) : AlertDialog {
-        val dialogBuilder = AlertDialog.Builder(this)
-        dialogBuilder.setMessage("Delete The Note?")
-                .setPositiveButton("Yes", { _, _ ->
-                    deleteNote(position)
-                })
-                .setNegativeButton("Cancel", {_, _ ->
-                    Log.d("OnLongClick", "Cancel")
-                })
-        return dialogBuilder.create()
     }
 
     // endregion
 
-    // region CreateNote
+    // region Create Note
 
     private fun createNote(v: View) {
         val intent = Intent(this, EditActivity::class.java)
@@ -110,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
     // endregion
 
-    // region EditNote
+    // region Edit Note
 
     private fun editNote(note: Note) {
         val intent = Intent(this, EditActivity::class.java).apply {
@@ -128,6 +113,20 @@ class MainActivity : AppCompatActivity() {
 
     // endregion
 
+    // region Delete Note
+
+    private fun createDeleteDialog(position: Int) : AlertDialog {
+        val dialogBuilder = AlertDialog.Builder(this)
+        dialogBuilder.setMessage("Delete The Note?")
+                .setPositiveButton("Yes", { _, _ ->
+                    deleteNote(position)
+                })
+                .setNegativeButton("Cancel", {_, _ ->
+                    Log.d("OnLongClick", "Cancel")
+                })
+        return dialogBuilder.create()
+    }
+
     private fun deleteNote(position: Int) {
         Log.d("OnLongClick", "Yes: " + position.toString())
         _notes.removeAt(position)
@@ -140,5 +139,7 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
         return true
     }
+
+    // endregion
 
 }

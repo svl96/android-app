@@ -8,6 +8,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".EditActivity">
 
+
     <TextView
         android:id="@+id/title_label"
         android:layout_width="match_parent"
@@ -47,21 +48,6 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@color/colorAccent"/>
-
-    <Button
-        android:id="@+id/save_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/save_button"
-        android:layout_gravity="bottom"
-        />
-
-
-
-
-
-
-
 
 
 </android.support.v7.widget.LinearLayoutCompat>
