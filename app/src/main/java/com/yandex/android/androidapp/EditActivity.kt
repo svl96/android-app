@@ -1,10 +1,12 @@
 package com.yandex.android.androidapp
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -18,7 +20,7 @@ class EditActivity : AppCompatActivity() {
 
     private var editTitle : EditText? = null
     private var editDescription : EditText? = null
-    private var noteColor : Int = Color.RED
+    private var noteColor : Int = DEFAULT_COLOR
     private var currentColor : View? = null
     private var saveNote : () -> Unit = {}
     private var note : Note? = null
@@ -52,6 +54,36 @@ class EditActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun createBackPressDialog() : AlertDialog {
+        val dialogBuilder = AlertDialog.Builder(this)
+        dialogBuilder.setMessage("Leave Without Save?")
+                .setPositiveButton("Yes", { _, _ ->
+                    super.onBackPressed()
+                })
+                .setNegativeButton("Cancel", {_, _ ->
+                })
+        return dialogBuilder.create()
+    }
+
+    private fun isDataChaged() : Boolean {
+        val title = editTitle?.text
+        val desc = editDescription?.text
+
+        if (title.isNullOrEmpty() && desc.isNullOrEmpty() && note == null)
+            return false
+        return (title?.toString() != note?.title || desc.toString() != note?.description ||
+                noteColor != note?.color)
+
+    }
+
+    override fun onBackPressed() {
+        if (isDataChaged()) {
+            val dialog = createBackPressDialog()
+            dialog.show()
+        } else
+            super.onBackPressed()
+    }
+
     // region Setup Menu
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -63,6 +95,8 @@ class EditActivity : AppCompatActivity() {
         if (item?.itemId == R.id.save_note_action) {
             saveNote()
             sendNote()
+        } else {
+            onBackPressed()
         }
         return true
     }
@@ -132,7 +166,5 @@ class EditActivity : AppCompatActivity() {
     }
 
     // endregion
-
-
 
 }

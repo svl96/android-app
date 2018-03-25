@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -16,6 +17,7 @@ import java.util.ArrayList
 const val EXTRA_NOTE : String = "com.yandex.android.EXTRA_NOTE"
 const val EXTRA_EDIT_MODE : String = "com.yandex.android.EXTRA_EDIT_MODE"
 const val EXTRA_COLOR : String = "com.yandex.android.EXTRA_COLOR"
+const val DEFAULT_COLOR : Int = Color.RED
 const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
 const val GET_COLOR_REQUEST : Int = 3

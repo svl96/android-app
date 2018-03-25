@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.ShapeDrawable
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -21,11 +20,8 @@ class ColorPickerActivity : AppCompatActivity() {
     private var currentColorView : View? = null
     private var hsvTextView : TextView? = null
     private var rgbTextView : TextView? = null
-
-    private var currentColorValue : Int? = null
-
+    private var currentColorValue : Int = DEFAULT_COLOR
     private val squareSideDP : Int = 50
-
     private val tag = "ColorPikerActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,11 +34,43 @@ class ColorPickerActivity : AppCompatActivity() {
         hsvTextView = findViewById(R.id.text_hsv)
         rgbTextView = findViewById(R.id.text_rgb)
 
-        currentColorValue = intent.getIntExtra(EXTRA_COLOR, R.color.colorAccent)
-        currentColorView?.setBackgroundColor(currentColorValue!!)
+        setupCurrentColorView(intent.getIntExtra(EXTRA_COLOR, DEFAULT_COLOR))
+        setupColorTextViews()
 
         drawGrad()
     }
+
+    // region Setup Color View
+
+    private fun setupColorTextViews() {
+        hsvTextView?.text = getHSVFormattedString()
+        rgbTextView?.text = getRGBFormattedString()
+    }
+
+    private fun getRGBFormattedString() : String {
+        val red = Color.red(currentColorValue)
+        val green = Color.green(currentColorValue)
+        val blue = Color.blue(currentColorValue)
+
+        return String.format("RGB: $red, $green, $blue")
+    }
+
+    private fun getHSVFormattedString() : String {
+        val hsvValue : FloatArray = floatArrayOf(1F, 1F, 1F)
+        Color.colorToHSV(currentColorValue, hsvValue)
+
+        return String.format(
+                "HSV: ${hsvValue[0].toInt()}, ${hsvValue[1].toInt()}, ${hsvValue[2].toInt()}")
+    }
+
+    private fun setupCurrentColorView(color: Int) {
+        currentColorValue = color
+        currentColorView?.setBackgroundColor(color)
+    }
+
+    // endregion
+
+    // region Back Press Action
 
     override fun onBackPressed() {
         val intent = Intent().apply {
@@ -55,17 +83,11 @@ class ColorPickerActivity : AppCompatActivity() {
 
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        Log.d(tag, "onOptionItemSelected")
-        Log.d(tag, item?.itemId.toString())
-        if (item?.itemId == R.id.parent)
-        {
-            Log.d(tag, "parentId")
-        } else if (item?.itemId == R.id.home) {
-            Log.d(tag, "homeId")
-        }
         onBackPressed()
         return true
     }
+
+    // endregion
 
     // region Draw Gradient Scroll
 
@@ -116,6 +138,8 @@ class ColorPickerActivity : AppCompatActivity() {
 
     // endregion
 
+    // region Draw color Rect
+
     private fun createRectView(color : Int) : View {
         val outRect = View(this)
         val layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -142,15 +166,13 @@ class ColorPickerActivity : AppCompatActivity() {
         outRect.setOnClickListener { v ->
             Log.d("onClickListener", "enter")
             val drawableBack = v.background as ColorDrawable
-            setUpCurrentColorView(drawableBack.color)
+            setupCurrentColorView(drawableBack.color)
+            setupColorTextViews()
         }
 
         return outRect
     }
 
-    private fun setUpCurrentColorView(color: Int) {
-        currentColorValue = color
-        currentColorView?.setBackgroundColor(color)
-    }
+    // endregion
 
 }
