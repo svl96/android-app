@@ -19,7 +19,7 @@ class NotesAdapter(private val _context: Context, private val _notes: ArrayList<
     }
 
     override fun getItemId(p0: Int): Long {
-        return _notes[p0].id.toLong()
+        return p0.toLong()
     }
 
     override fun getCount(): Int {
@@ -29,7 +29,7 @@ class NotesAdapter(private val _context: Context, private val _notes: ArrayList<
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
 
         var customView : View? = convertView
-        var viewHolder : ViewHolder
+        val viewHolder : ViewHolder
         if (convertView == null) {
             customView = LayoutInflater.from(_context)
                     .inflate(R.layout.note_item, parent, false)

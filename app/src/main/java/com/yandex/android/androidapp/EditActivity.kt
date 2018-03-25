@@ -88,8 +88,6 @@ class EditActivity : AppCompatActivity() {
         note.description = editDescription?.text.toString()
         note.datetime = Calendar.getInstance().time
         note.color = noteColor
-
-
     }
 
     // endregion
@@ -97,20 +95,19 @@ class EditActivity : AppCompatActivity() {
     // region CreateNote
     private fun onCreateMode() {
         setTitle(R.string.create_title)
-        val noteId = intent.getIntExtra(EXTRA_NOTE_ID, 0)
-
         saveButton?.setOnClickListener {
-            val note = createNote(noteId)
+            val note = createNote()
             sendNote(note)
         }
     }
 
-    private fun createNote(id: Int): Note {
+    private fun createNote(): Note {
+        val uniqueID = UUID.randomUUID().toString()
         val noteTitle = editTitle?.text.toString()
         val noteDescription = editDescription?.text.toString()
         val noteDate = Calendar.getInstance().time
-        val noteColor = noteColor ?: Color.RED
-        return Note(id, noteTitle, noteDescription , noteDate, noteColor)
+        val noteColor = noteColor
+        return Note(uniqueID, noteTitle, noteDescription , noteDate, noteColor)
     }
 
     // endregion
