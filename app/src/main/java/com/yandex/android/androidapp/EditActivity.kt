@@ -3,14 +3,12 @@ package com.yandex.android.androidapp
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import java.util.*
@@ -47,10 +45,9 @@ class EditActivity : AppCompatActivity() {
     }
 
     private fun sendNote() {
-        val intent = Intent().apply {
-            putExtra(EXTRA_NOTE, note)
-        }
-        setResult(Activity.RESULT_OK, intent)
+        val outIntent = Intent()
+        outIntent.putExtra(EXTRA_NOTE, note)
+        setResult(Activity.RESULT_OK, outIntent)
         finish()
     }
 
@@ -65,7 +62,7 @@ class EditActivity : AppCompatActivity() {
         return dialogBuilder.create()
     }
 
-    private fun isDataChaged() : Boolean {
+    private fun isDataChanged() : Boolean {
         val title = editTitle?.text
         val desc = editDescription?.text
 
@@ -77,7 +74,7 @@ class EditActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (isDataChaged()) {
+        if (isDataChanged()) {
             val dialog = createBackPressDialog()
             dialog.show()
         } else
@@ -117,7 +114,7 @@ class EditActivity : AppCompatActivity() {
 
         if (resultCode == Activity.RESULT_OK && requestCode == GET_COLOR_REQUEST &&
                  data != null) {
-            noteColor = data.getIntExtra(EXTRA_COLOR, Color.RED)
+            noteColor = data.getIntExtra(EXTRA_COLOR, DEFAULT_COLOR)
             currentColor?.setBackgroundColor(noteColor)
 
         }
@@ -134,7 +131,7 @@ class EditActivity : AppCompatActivity() {
         this.editTitle?.setText(note?.title, TextView.BufferType.EDITABLE)
         this.editDescription?.setText(note?.description, TextView.BufferType.EDITABLE)
 
-        noteColor = note?.color ?: Color.RED
+        noteColor = note?.color ?: DEFAULT_COLOR
 
         saveNote = {updateNote()}
 

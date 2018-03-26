@@ -20,24 +20,32 @@ class ColorPickerActivity : AppCompatActivity() {
     private var currentColorView : View? = null
     private var hsvTextView : TextView? = null
     private var rgbTextView : TextView? = null
+    private var scrollLayout : LinearLayout? = null
+
     private var currentColorValue : Int = DEFAULT_COLOR
     private val squareSideDP : Int = 50
+    private val squareMarginDP: Int = 25
+    private val squareCount: Int = 16
+    private val hueStep : Int = 60
     private val tag = "ColorPikerActivity"
+    private val backgroundSat : Float = .8F
+    private val backgroundBrightness : Float = 1F
+    private val squareSat : Float = 1F
+    private val squareBrightness = .95F
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_color_picker)
 
-        Log.d(tag, "onCreate()")
-
         currentColorView = findViewById(R.id.current_color_view)
         hsvTextView = findViewById(R.id.text_hsv)
         rgbTextView = findViewById(R.id.text_rgb)
+        scrollLayout = findViewById(R.id.scroll_layout)
 
         setupCurrentColorView(intent.getIntExtra(EXTRA_COLOR, DEFAULT_COLOR))
         setupColorTextViews()
 
-        drawGrad()
+        drawScrollView()
     }
 
     // region Setup Color View
@@ -91,56 +99,62 @@ class ColorPickerActivity : AppCompatActivity() {
 
     // region Draw Gradient Scroll
 
-    private fun drawGrad() {
-        val scrollLayout = findViewById<LinearLayout>(R.id.scroll_layout)
+    private fun fillScrollBackground() {
         val drawable = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
-                getHSVGradientColors(60))
-        drawable.shape = GradientDrawable.RECTANGLE
-        scrollLayout.background = drawable
+                getHSVGradientColors(hueStep))
 
-        val squareCount = 16
-        val squareMarginDP : Int = squareSideDP/2
-        val hueValues = calcHueValues(squareCount, squareSideDP, squareMarginDP)
+        drawable.shape = GradientDrawable.RECTANGLE
+        scrollLayout?.background = drawable
+    }
+
+    private fun addColorRectanglesView() {
+        val hueValues = calcCenterHueValues(squareCount, squareSideDP, squareMarginDP)
 
         for (i in 1..squareCount) {
-            val hsvColorBright = Color.HSVToColor(floatArrayOf(hueValues[i-1].toFloat(), 1F, .95F))
-            scrollLayout.addView(createRectView(hsvColorBright))
+            val hsvColorBright = Color.HSVToColor(floatArrayOf(
+                    hueValues[i-1].toFloat(),
+                    squareSat,
+                    squareBrightness
+            ))
+            scrollLayout?.addView(createColorRectView(hsvColorBright))
         }
+    }
 
+    private fun drawScrollView() {
+        fillScrollBackground()
+        addColorRectanglesView()
     }
 
     private fun getHSVGradientColors(hueStep : Int) : IntArray {
-        val satVal = .8F
-        val brightnessVal = 1F
         val colorsList = mutableListOf<Int>()
         for (i in 0..360 step hueStep ) {
             val hueVal = i.toFloat()
-            colorsList.add(Color.HSVToColor(floatArrayOf(hueVal, satVal, brightnessVal)))
+            colorsList.add(Color.HSVToColor(
+                    floatArrayOf(hueVal, backgroundSat, backgroundBrightness)))
         }
 
         return colorsList.toIntArray()
     }
 
-    private fun calcHueValues(squareCount : Int, widthDP : Int, marginDP : Int ) : Array<Double> {
-        val fullWidth = (squareCount * (widthDP + marginDP*2)).toDouble()
+    private fun calcCenterHueValues(squareCount : Int, widthDP : Int, marginDP : Int ) : Array<Double> {
         val outHueValues = mutableListOf<Double>()
-        val halfWidth = widthDP / 2
+
+        val squareShift = 2 * marginDP + widthDP
+        val fullWidth = (squareCount * squareShift).toDouble()
+        val centerShift = marginDP + widthDP / 2
+
         var currentPos = 0
         for (i in 1..squareCount) {
-            val center = currentPos + marginDP + halfWidth
-            val hueVal = center / fullWidth * 360
+            val center = currentPos + centerShift
+            val hueVal = (center / fullWidth) * 360
             outHueValues.add(hueVal)
-            currentPos += 2 * marginDP + widthDP
+            currentPos += squareShift
         }
 
         return outHueValues.toTypedArray()
     }
 
-    // endregion
-
-    // region Draw color Rect
-
-    private fun createRectView(color : Int) : View {
+    private fun createColorRectView(color : Int) : View {
         val outRect = View(this)
         val layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -149,7 +163,7 @@ class ColorPickerActivity : AppCompatActivity() {
         val typedSquareSide = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 squareSideDP.toFloat(), displayMetrics).toInt()
         val typedSquareMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                squareSideDP.toFloat() / 2, displayMetrics).toInt()
+                squareMarginDP.toFloat(), displayMetrics).toInt()
 
         layoutParams.width =  typedSquareSide
         layoutParams.height = typedSquareSide

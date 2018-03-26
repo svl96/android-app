@@ -8,18 +8,18 @@
     tools:context="com.yandex.android.androidapp.MainActivity">
 
     <ListView
-        android:id="@+id/notes_list"
+        android:id="@+id/notes_list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
+        android:paddingTop="@dimen/note_list_padding_top"
         />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/FAB1"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="@dimen/fab_size"
+        android:layout_height="@dimen/fab_size"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:layout_marginEnd="@dimen/fab_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:src="@drawable/ic_plus"

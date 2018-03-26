@@ -2,8 +2,6 @@ package com.yandex.android.androidapp
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.Dialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
@@ -35,12 +33,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d("MainTesting", "onCreate()")
 
         val savedNotes = savedInstanceState?.getSerializable("NOTES") as ArrayList<*>?
         savedNotes?.mapTo(_notes, { s -> s as Note })
 
-        _listView = findViewById(R.id.notes_list)
         _actionButton = findViewById(R.id.FAB1)
+        _listView = findViewById(R.id.notes_list_view)
         _actionButton?.setOnClickListener { v -> createNote(v) }
 
         setUpListView()
@@ -54,8 +53,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
         Log.d("onActivityResultTesting", resultCode.toString())
+        super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
             val note = data.getSerializableExtra(EXTRA_NOTE) as Note
             Log.d("onActivityResultTesting", note.toString())
