@@ -2,6 +2,7 @@ package com.yandex.android.androidapp
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -28,10 +29,20 @@ class ListNotesFragment : Fragment() {
     }
 
     private var _notes : ArrayList<Note> = arrayListOf()
+    private var _tag : String = "ListNotesFragment"
 
     private var _notesAdapter : NotesAdapter? = null
     private var _listView: ListView? = null
     private var _actionButton: FloatingActionButton? = null
+    private var containerUi : ContainerUI? = null
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context is ContainerUI)
+            containerUi = context
+        else
+            throw IllegalStateException("Context should implement ContainerUI")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +73,7 @@ class ListNotesFragment : Fragment() {
     }
 
     private fun setUpListView() {
-        _notesAdapter = NotesAdapter(context, _notes)
+        _notesAdapter = NotesAdapter(activity, _notes)
         _listView?.adapter = _notesAdapter
 
         _listView?.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
@@ -91,8 +102,14 @@ class ListNotesFragment : Fragment() {
     // region Create Note
 
     private fun createNote(v: View) {
-        val intent = Intent(context, EditActivity::class.java)
-        startActivityForResult(intent, GET_NOTE_REQUEST)
+
+        val editFragment = EditFragment.newInstance(null)
+        editFragment.setTargetFragment(this, GET_NOTE_REQUEST)
+        Log.d(_tag, "CreateNote()")
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, editFragment)
+                .addToBackStack(null)
+                .commit()
     }
 
 
@@ -106,11 +123,12 @@ class ListNotesFragment : Fragment() {
     // region Edit Note
 
     private fun editNote(note: Note) {
-        val intent = Intent(context, EditActivity::class.java).apply {
-            putExtra(EXTRA_EDIT_MODE, true)
-            putExtra(EXTRA_NOTE, note)
-        }
-        startActivityForResult(intent, EDIT_NOTE_REQUEST)
+        val editFragment = EditFragment.newInstance(note)
+        editFragment.setTargetFragment(this, EDIT_NOTE_REQUEST)
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, editFragment, "test")
+                .addToBackStack("ListNotes")
+                .commit()
     }
 
     private fun updateNoteItem(editedNote: Note) {
@@ -124,7 +142,7 @@ class ListNotesFragment : Fragment() {
     // region Delete Note
 
     private fun createDeleteDialog(position: Int) : AlertDialog {
-        val dialogBuilder = AlertDialog.Builder(context)
+        val dialogBuilder = AlertDialog.Builder(activity)
         dialogBuilder.setMessage("Delete The Note?")
                 .setPositiveButton("Yes", { _, _ ->
                     deleteNote(position)

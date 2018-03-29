@@ -1,16 +1,9 @@
 package com.yandex.android.androidapp
 
-import android.app.Activity
-import android.app.AlertDialog
-import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
 import android.util.Log
-import android.view.View
-import android.widget.*
-import java.util.ArrayList
 
 const val EXTRA_NOTE : String = "com.yandex.android.EXTRA_NOTE"
 const val EXTRA_EDIT_MODE : String = "com.yandex.android.EXTRA_EDIT_MODE"
@@ -20,8 +13,7 @@ const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
 const val GET_COLOR_REQUEST : Int = 3
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity(), ContainerUI  {
     private val tag = "MainActivity"
 
     // region Setup Activity
@@ -36,11 +28,24 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager
                     .beginTransaction()
                     .add(R.id.fragment_container, fragment, "FirstFragment")
+                    .addToBackStack(null)
                     .commit()
         }
 
     }
     // endregion
+
+    override fun setActivityTitle(titleId: Int) {
+        setTitle(titleId)
+    }
+
+    override fun onBackPressed() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (fragment is EditFragment) {
+            fragment.onBackPressed()
+        }
+
+    }
 
 
 }

@@ -27,12 +27,12 @@ class EditActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit)
 
-        editTitle = findViewById(R.id.title_edit)
-        editDescription = findViewById(R.id.description_edit)
-        currentColor = findViewById(R.id.color_view)
 
         val editMode = intent.getBooleanExtra(EXTRA_EDIT_MODE, false)
 
+        editTitle = findViewById(R.id.title_edit)
+        editDescription = findViewById(R.id.description_edit)
+        currentColor = findViewById(R.id.color_view)
         currentColor?.setOnClickListener {
             onChooseColor()
         }
@@ -113,7 +113,7 @@ class EditActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK && requestCode == GET_COLOR_REQUEST &&
-                 data != null) {
+                data != null) {
             noteColor = data.getIntExtra(EXTRA_COLOR, DEFAULT_COLOR)
             currentColor?.setBackgroundColor(noteColor)
 
