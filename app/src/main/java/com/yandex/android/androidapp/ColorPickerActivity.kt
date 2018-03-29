@@ -35,7 +35,7 @@ class ColorPickerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_color_picker)
+        setContentView(R.layout.fragment_color_picker)
 
 
         currentColorView = findViewById(R.id.current_color_view)

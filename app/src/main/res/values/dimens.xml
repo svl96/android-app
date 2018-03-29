@@ -26,4 +26,5 @@
     <dimen name="fab_size">56dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="item_color_view_width">16dp</dimen>
+    <dimen name="item_height">72dp</dimen>
 </resources>

@@ -53,7 +53,7 @@ class EditFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(_tag, "onCreateView()")
 
-        val rootView = inflater?.inflate(R.layout.activity_edit, container, false)!!
+        val rootView = inflater?.inflate(R.layout.fragment_edit, container, false)!!
 
         editTitle = rootView.findViewById(R.id.title_edit)
         editDescription = rootView.findViewById(R.id.description_edit)

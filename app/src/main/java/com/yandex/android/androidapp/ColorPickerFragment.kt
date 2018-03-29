@@ -51,7 +51,7 @@ class ColorPickerFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
-        val rootView = inflater?.inflate(R.layout.activity_color_picker, container, false)!!
+        val rootView = inflater?.inflate(R.layout.fragment_color_picker, container, false)!!
 
         currentColorView = rootView.findViewById(R.id.current_color_view)
         hsvTextView = rootView.findViewById(R.id.text_hsv)
