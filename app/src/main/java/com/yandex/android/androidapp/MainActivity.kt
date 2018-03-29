@@ -22,10 +22,6 @@ const val GET_COLOR_REQUEST : Int = 3
 
 class MainActivity : AppCompatActivity() {
 
-    private var _notes : ArrayList<Note> = arrayListOf()
-    private var _notesAdapter : NotesAdapter? = null
-    private var _listView: ListView? = null
-    private var _actionButton: FloatingActionButton? = null
     private val tag = "MainActivity"
 
     // region Setup Activity
@@ -35,112 +31,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Log.d("MainTesting", "onCreate()")
 
-        val savedNotes = savedInstanceState?.getSerializable("NOTES") as ArrayList<*>?
-        savedNotes?.mapTo(_notes, { s -> s as Note })
-
-        _actionButton = findViewById(R.id.FAB1)
-        _listView = findViewById(R.id.notes_list_view)
-        _actionButton?.setOnClickListener { v -> createNote(v) }
-
-        setUpListView()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle?) {
-        Log.d(tag, "onSaveInstantState()")
-
-        outState?.putSerializable("NOTES", _notes)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d("onActivityResultTesting", resultCode.toString())
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && data != null) {
-            val note = data.getSerializableExtra(EXTRA_NOTE) as Note
-            Log.d("onActivityResultTesting", note.toString())
-            if (requestCode == GET_NOTE_REQUEST ) {
-                addNoteItem(note)
-            } else if (requestCode == EDIT_NOTE_REQUEST) {
-                updateNoteItem(note)
-            }
-        }
-    }
-
-    private fun setUpListView() {
-        _notesAdapter = NotesAdapter(this, _notes)
-        _listView?.adapter = _notesAdapter
-
-        _listView?.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            editNote(_notes[position])
+        if (savedInstanceState == null) {
+            val fragment = ListNotesFragment.newInstance()
+            supportFragmentManager
+                    .beginTransaction()
+                    .add(R.id.fragment_container, fragment, "FirstFragment")
+                    .commit()
         }
 
-        _listView?.setOnItemLongClickListener { _, _, position: Int, _ ->
-            onItemLongClick(position)
-        }
     }
-
     // endregion
 
-    // region Create Note
-
-    private fun createNote(v: View) {
-        val intent = Intent(this, EditActivity::class.java)
-        startActivityForResult(intent, GET_NOTE_REQUEST)
-    }
-
-
-    private fun addNoteItem(note: Note) {
-        _notes.add(note)
-        _notesAdapter?.notifyDataSetChanged()
-    }
-
-    // endregion
-
-    // region Edit Note
-
-    private fun editNote(note: Note) {
-        val intent = Intent(this, EditActivity::class.java).apply {
-            putExtra(EXTRA_EDIT_MODE, true)
-            putExtra(EXTRA_NOTE, note)
-        }
-        startActivityForResult(intent, EDIT_NOTE_REQUEST)
-    }
-
-    private fun updateNoteItem(editedNote: Note) {
-        val index = _notes.indexOfFirst{ note -> note.id == editedNote.id }
-        _notes[index] = editedNote
-        _notesAdapter?.notifyDataSetChanged()
-    }
-
-    // endregion
-
-    // region Delete Note
-
-    private fun createDeleteDialog(position: Int) : AlertDialog {
-        val dialogBuilder = AlertDialog.Builder(this)
-        dialogBuilder.setMessage("Delete The Note?")
-                .setPositiveButton("Yes", { _, _ ->
-                    deleteNote(position)
-                })
-                .setNegativeButton("Cancel", {_, _ ->
-                    Log.d("OnLongClick", "Cancel")
-                })
-        return dialogBuilder.create()
-    }
-
-    private fun deleteNote(position: Int) {
-        Log.d("OnLongClick", "Yes: " + position.toString())
-        _notes.removeAt(position)
-        _notesAdapter?.notifyDataSetChanged()
-    }
-
-    private fun onItemLongClick(position: Int) : Boolean
-    {
-        val dialog = createDeleteDialog(position)
-        dialog.show()
-        return true
-    }
-
-    // endregion
 
 }
