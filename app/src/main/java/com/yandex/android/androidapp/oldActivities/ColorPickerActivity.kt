@@ -1,4 +1,4 @@
-package com.yandex.android.androidapp
+package com.yandex.android.androidapp.oldActivities
 
 import android.app.Activity
 import android.content.Intent
@@ -6,14 +6,19 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.util.TypedValue
-import android.view.*
+import android.view.MenuItem
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.yandex.android.androidapp.DEFAULT_COLOR
+import com.yandex.android.androidapp.EXTRA_COLOR
+import com.yandex.android.androidapp.R
 
-class ColorPickerFragment : Fragment() {
+
+class ColorPickerActivity : AppCompatActivity() {
 
     private var currentColorView : View? = null
     private var hsvTextView : TextView? = null
@@ -25,45 +30,26 @@ class ColorPickerFragment : Fragment() {
     private val squareMarginDP: Int = 25
     private val squareCount: Int = 16
     private val hueStep : Int = 60
+    private val tag = "ColorPikerActivity"
     private val backgroundSat : Float = .8F
     private val backgroundBrightness : Float = 1F
     private val squareSat : Float = 1F
     private val squareBrightness = .95F
 
-    companion object {
-        @JvmStatic
-        fun newInstance(color: Int) : ColorPickerFragment {
-            val args = Bundle()
-
-            args.putInt(EXTRA_COLOR, color)
-            val fragment = ColorPickerFragment()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
+        setContentView(R.layout.fragment_color_picker)
 
-        currentColorValue = arguments.getInt(EXTRA_COLOR)
-    }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        currentColorView = findViewById(R.id.current_color_view)
+        hsvTextView = findViewById(R.id.text_hsv)
+        rgbTextView = findViewById(R.id.text_rgb)
+        scrollLayout = findViewById(R.id.scroll_layout)
 
-        val rootView = inflater?.inflate(R.layout.fragment_color_picker, container, false)!!
-
-        currentColorView = rootView.findViewById(R.id.current_color_view)
-        hsvTextView = rootView.findViewById(R.id.text_hsv)
-        rgbTextView = rootView.findViewById(R.id.text_rgb)
-        scrollLayout = rootView.findViewById(R.id.scroll_layout)
-
-        currentColorView?.setBackgroundColor(currentColorValue)
-
+        setupCurrentColorView(intent.getIntExtra(EXTRA_COLOR, DEFAULT_COLOR))
         setupColorTextViews()
-        drawScrollView()
 
-        return rootView
+        drawScrollView()
     }
 
     // region Setup Color View
@@ -98,41 +84,18 @@ class ColorPickerFragment : Fragment() {
 
     // region Back Press Action
 
-//    override fun onBackPressed() {
-//        val intent = Intent().apply {
-//            putExtra(EXTRA_COLOR, currentColorValue)
-//        }
-//        Log.d(tag, "onBackPressed")
-//        setResult(Activity.RESULT_OK, intent)
-//        finish()
-//    }
-//
-//
-//    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-//        onBackPressed()
-//        return true
-//    }
-
-    // endregion
-
-    // region Setup Menu
-
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.save_button, menu)
-    }
-
-    private fun sendColor() {
-        val outIntent = Intent().apply {
+    override fun onBackPressed() {
+        val intent = Intent().apply {
             putExtra(EXTRA_COLOR, currentColorValue)
         }
-        targetFragment.onActivityResult(targetRequestCode, Activity.RESULT_OK, outIntent)
-        fragmentManager.popBackStack()
+        Log.d(tag, "onBackPressed")
+        setResult(Activity.RESULT_OK, intent)
+        finish()
     }
 
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item?.itemId == R.id.save_note_action) {
-            sendColor()
-        }
+        onBackPressed()
         return true
     }
 
@@ -196,7 +159,7 @@ class ColorPickerFragment : Fragment() {
     }
 
     private fun createColorRectView(color : Int) : View {
-        val outRect = View(this.activity)
+        val outRect = View(this)
         val layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT)
         val displayMetrics = resources.displayMetrics
@@ -229,4 +192,5 @@ class ColorPickerFragment : Fragment() {
     }
 
     // endregion
+
 }

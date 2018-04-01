@@ -1,11 +1,10 @@
-package com.yandex.android.androidapp
+package com.yandex.android.androidapp.fragments
 
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -14,16 +13,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
+import com.yandex.android.androidapp.*
+import com.yandex.android.androidapp.adapters.RecyclerViewAdapter
 import kotlin.collections.ArrayList
 
 
 class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     companion object {
-
-        private const val NOTES_KEY = "NOTES"
-
         @JvmStatic
         fun newInstance() : ListNotesFragment {
             return ListNotesFragment()
@@ -53,10 +50,9 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        containerUi?.setActivityTitle(R.string.app_name)
 
         val rootView = inflater?.inflate(R.layout.fragment_list_notes, container, false)!!
-
-
         _actionButton = rootView.findViewById(R.id.FAB1)
         _recyclerView = rootView.findViewById(R.id.notes_list_view)
         _actionButton?.setOnClickListener { createItem() }
@@ -84,7 +80,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         if (resultCode == Activity.RESULT_OK && data != null) {
             val note = data.getSerializableExtra(EXTRA_NOTE) as Note
             Log.d("onActivityResultTesting", note.toString())
-            if (requestCode == GET_NOTE_REQUEST ) {
+            if (requestCode == GET_NOTE_REQUEST) {
                 addNoteItem(note)
             } else if (requestCode == EDIT_NOTE_REQUEST) {
                 updateNoteItem(note)
@@ -122,7 +118,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         val editFragment = EditFragment.newInstance(item)
         editFragment.setTargetFragment(this, EDIT_NOTE_REQUEST)
         fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, editFragment, "test")
+                .replace(R.id.fragment_container, editFragment, "EditFragment")
                 .addToBackStack("ListNotes")
                 .commit()
     }

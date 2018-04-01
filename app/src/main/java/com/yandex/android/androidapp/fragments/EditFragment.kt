@@ -1,4 +1,4 @@
-package com.yandex.android.androidapp
+package com.yandex.android.androidapp.fragments
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -13,6 +13,7 @@ import android.view.*
 
 import android.widget.EditText
 import android.widget.TextView
+import com.yandex.android.androidapp.*
 import java.util.*
 
 
@@ -28,7 +29,6 @@ class EditFragment : Fragment() {
             }
             val fragment = EditFragment()
             fragment.arguments = args
-            val check = fragment.arguments == null
             return fragment
         }
     }
@@ -63,8 +63,10 @@ class EditFragment : Fragment() {
             onEditMode()
         else onCreateMode()
 
+
         currentColor?.setOnClickListener {
             onChooseColor()
+            containerUi?.closeKeyboard()
         }
         currentColor?.setBackgroundColor(noteColor)
 
@@ -110,7 +112,7 @@ class EditFragment : Fragment() {
         colorPickerFragment.setTargetFragment(this, GET_COLOR_REQUEST)
         fragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container, colorPickerFragment)
+                .replace(R.id.fragment_container, colorPickerFragment, "ColorPickerFragment")
                 .addToBackStack(null)
                 .commit()
     }
@@ -123,7 +125,6 @@ class EditFragment : Fragment() {
             noteColor = data.getIntExtra(EXTRA_COLOR, DEFAULT_COLOR)
             note?.color = noteColor
             currentColor?.setBackgroundColor(noteColor)
-
         }
     }
 
@@ -165,7 +166,7 @@ class EditFragment : Fragment() {
         val noteDescription = editDescription?.text.toString()
         val noteDate = Calendar.getInstance().time
         val noteColor = noteColor
-        note = Note(uniqueID, noteTitle, noteDescription , noteDate, noteColor)
+        note = Note(uniqueID, noteTitle, noteDescription, noteDate, noteColor)
     }
 
     // endregion

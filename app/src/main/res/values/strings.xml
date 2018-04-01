@@ -11,4 +11,7 @@
     <string name="new_note">New Note</string>
     <string name="choose_color">Choose Color</string>
     <string name="save_action">SaveAction</string>
+    <string name="home_text">Notes</string>
+    <string name="settings_text">Settings</string>
+    <string name="about_text">About</string>
 </resources>

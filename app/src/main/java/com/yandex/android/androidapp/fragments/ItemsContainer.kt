@@ -1,6 +1,4 @@
-package com.yandex.android.androidapp
-
-import java.text.ParsePosition
+package com.yandex.android.androidapp.fragments
 
 
 interface ItemsContainer<Item> {

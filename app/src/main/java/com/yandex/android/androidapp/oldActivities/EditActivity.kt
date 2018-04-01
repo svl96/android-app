@@ -1,4 +1,4 @@
-package com.yandex.android.androidapp
+package com.yandex.android.androidapp.oldActivities
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
+import com.yandex.android.androidapp.*
 import java.util.*
 
 
@@ -158,7 +159,7 @@ class EditActivity : AppCompatActivity() {
         val noteDescription = editDescription?.text.toString()
         val noteDate = Calendar.getInstance().time
         val noteColor = noteColor
-        note = Note(uniqueID, noteTitle, noteDescription , noteDate, noteColor)
+        note = Note(uniqueID, noteTitle, noteDescription, noteDate, noteColor)
     }
 
     // endregion
