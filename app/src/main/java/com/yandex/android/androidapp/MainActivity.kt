@@ -1,9 +1,12 @@
 package com.yandex.android.androidapp
 
+import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
@@ -12,6 +15,7 @@ import android.view.MenuItem
 import com.yandex.android.androidapp.fragments.EditFragment
 import com.yandex.android.androidapp.fragments.ListNotesFragment
 import android.view.inputmethod.InputMethodManager
+import com.yandex.android.androidapp.fragments.AboutAppFragment
 import com.yandex.android.androidapp.fragments.SettingsFragment
 
 
@@ -40,9 +44,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        drawerLayout = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.nav_view)
-
 
         if (savedInstanceState == null) {
             val fragment = ListNotesFragment.newInstance()
@@ -52,9 +54,11 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
                     .addToBackStack(null)
                     .commit()
         }
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_menu)
-
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            drawerLayout = findViewById(R.id.drawer_layout)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_menu)
+        }
         setupNavigation()
     }
     // endregion
@@ -70,44 +74,44 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         }
     }
 
-    private fun onHomeSelected() : Boolean {
-        val currentFragment = supportFragmentManager.findFragmentByTag("ListNotesFragment")
-        if (currentFragment == null || !currentFragment.isVisible) {
-            val newFragment = ListNotesFragment.newInstance()
+    private fun openSelectedFragment(tag: String, fragment: Fragment) {
+        if (!fragment.isVisible) {
             supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_container, newFragment, "ListNotesFragment")
+                    .replace(R.id.fragment_container, fragment, tag)
                     .commit()
         }
         drawerLayout?.closeDrawer(GravityCompat.START)
+    }
+
+    private fun onHomeSelected() : Boolean {
+        val tag = "ListNotesFragment"
+        var fragment = supportFragmentManager.findFragmentByTag(tag)
+        if (fragment == null)
+            fragment = ListNotesFragment.newInstance()
+
+        openSelectedFragment(tag, fragment)
         return true
     }
 
     private fun onSettingsSelected() : Boolean {
-        val currentFragment = supportFragmentManager.findFragmentByTag("SettingsFragment")
-        if (currentFragment == null || !currentFragment.isVisible) {
-            val newFragment = SettingsFragment.newInstance()
-            supportFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, newFragment, "SettingsFragment")
-                    .addToBackStack(null)
-                    .commit()
-        }
-        drawerLayout?.closeDrawer(GravityCompat.START)
+        val tag = "SettingsFragment"
+        var fragment = supportFragmentManager.findFragmentByTag(tag)
+        if (fragment == null)
+            fragment = SettingsFragment.newInstance()
+
+        openSelectedFragment(tag, fragment)
         return true
     }
 
     private fun onAboutAppSelected() : Boolean {
-        val currentFragment = supportFragmentManager.findFragmentByTag("AboutAppFragment")
-        if (currentFragment == null || !currentFragment.isVisible) {
-            val newFragment = SettingsFragment.newInstance()
-            supportFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, newFragment, "AboutAppFragment")
-                    .addToBackStack(null)
-                    .commit()
-        }
-        drawerLayout?.closeDrawer(GravityCompat.START)
+        val tag = "AboutAppFragment"
+        var fragment = supportFragmentManager.findFragmentByTag(tag)
+        if (fragment == null)
+            fragment = AboutAppFragment.newInstance()
+
+        openSelectedFragment(tag, fragment)
+
         return true
     }
 

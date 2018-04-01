@@ -50,7 +50,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        containerUi?.setActivityTitle(R.string.app_name)
+        containerUi?.setActivityTitle(R.string.list_title)
 
         val rootView = inflater?.inflate(R.layout.fragment_list_notes, container, false)!!
         _actionButton = rootView.findViewById(R.id.FAB1)

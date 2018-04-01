@@ -28,4 +28,5 @@
     <dimen name="item_color_view_width">16dp</dimen>
     <dimen name="item_height">72dp</dimen>
     <dimen name="item_bottom_margin">2dp</dimen>
+    <dimen name="nav_width">250dp</dimen>
 </resources>
