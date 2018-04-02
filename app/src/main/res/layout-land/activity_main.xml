@@ -6,7 +6,10 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-    <include layout="@layout/nav_layout"/>
+    <include layout="@layout/nav_layout"
+        android:layout_width="@dimen/land_nav_width"
+        android:layout_height="match_parent"
+        />
 
     <FrameLayout android:id="@+id/fragment_container"
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MainActivity"
-        android:paddingStart="@dimen/nav_width"
+        android:paddingStart="@dimen/land_nav_width"
         android:paddingEnd="0dp"
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
