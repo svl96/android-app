@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <item
+            android:id="@+id/home_item"
+            android:icon="@drawable/ic_home"
+            android:title="@string/home_text" />
+        <item
+            android:id="@+id/settings_item"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settings_text" />
+        <item
+            android:id="@+id/about_item"
+            android:icon="@drawable/ic_alert"
+            android:title="@string/about_text" />
+    </group>
+</menu>

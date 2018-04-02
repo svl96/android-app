@@ -1,16 +1,16 @@
-package com.yandex.android.androidapp
+package com.yandex.android.androidapp.oldActivities
 
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
+import com.yandex.android.androidapp.*
 import java.util.*
 
 
@@ -25,14 +25,14 @@ class EditActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit)
+        setContentView(R.layout.fragment_edit)
+
+
+        val editMode = intent.getBooleanExtra(EXTRA_EDIT_MODE, false)
 
         editTitle = findViewById(R.id.title_edit)
         editDescription = findViewById(R.id.description_edit)
         currentColor = findViewById(R.id.color_view)
-
-        val editMode = intent.getBooleanExtra(EXTRA_EDIT_MODE, false)
-
         currentColor?.setOnClickListener {
             onChooseColor()
         }
@@ -113,7 +113,7 @@ class EditActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK && requestCode == GET_COLOR_REQUEST &&
-                 data != null) {
+                data != null) {
             noteColor = data.getIntExtra(EXTRA_COLOR, DEFAULT_COLOR)
             currentColor?.setBackgroundColor(noteColor)
 
@@ -159,7 +159,7 @@ class EditActivity : AppCompatActivity() {
         val noteDescription = editDescription?.text.toString()
         val noteDate = Calendar.getInstance().time
         val noteColor = noteColor
-        note = Note(uniqueID, noteTitle, noteDescription , noteDate, noteColor)
+        note = Note(uniqueID, noteTitle, noteDescription, noteDate, noteColor)
     }
 
     // endregion

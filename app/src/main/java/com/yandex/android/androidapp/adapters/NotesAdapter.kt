@@ -1,4 +1,4 @@
-package com.yandex.android.androidapp
+package com.yandex.android.androidapp.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
+import com.yandex.android.androidapp.Note
+import com.yandex.android.androidapp.R
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList

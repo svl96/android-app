@@ -1,4 +1,4 @@
-package com.yandex.android.androidapp
+package com.yandex.android.androidapp.oldActivities
 
 import android.app.Activity
 import android.content.Intent
@@ -13,6 +13,9 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.yandex.android.androidapp.DEFAULT_COLOR
+import com.yandex.android.androidapp.EXTRA_COLOR
+import com.yandex.android.androidapp.R
 
 
 class ColorPickerActivity : AppCompatActivity() {
@@ -35,7 +38,8 @@ class ColorPickerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_color_picker)
+        setContentView(R.layout.fragment_color_picker)
+
 
         currentColorView = findViewById(R.id.current_color_view)
         hsvTextView = findViewById(R.id.text_hsv)

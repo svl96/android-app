@@ -16,24 +16,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".EditActivity"
-            android:parentActivityName=".MainActivity">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name=".ColorPickerActivity"
-            android:parentActivityName=".EditActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".EditActivity" />
-        </activity>
-
     </application>
 
 </manifest>

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v4.widget.DrawerLayout
-    android:id="@+id/drawer_layout"
+<RelativeLayout
+    android:id="@+id/main_relative_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:openDrawer="start">
+    android:layout_width="match_parent">
+
+    <include layout="@layout/nav_layout"
+        android:layout_width="@dimen/land_nav_width"
+        android:layout_height="match_parent"
+        />
 
     <FrameLayout android:id="@+id/fragment_container"
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,6 +17,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MainActivity"
+        android:paddingStart="@dimen/land_nav_width"
+        android:paddingEnd="0dp"
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
         <android.support.v7.widget.Toolbar
@@ -24,8 +28,7 @@
             android:background="@color/colorPrimary"
             app:titleTextColor="@color/toolbarTextColor"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"/>
+
     </FrameLayout>
 
-    <include layout="@layout/nav_layout"/>
-
-</android.support.v4.widget.DrawerLayout>
+</RelativeLayout>
