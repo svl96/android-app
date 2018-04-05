@@ -145,9 +145,11 @@ class EditFragment : Fragment() {
     }
 
     private fun updateNote(){
+        val date = Calendar.getInstance().time
         note?.title = editTitle?.text.toString()
         note?.description = editDescription?.text.toString()
-        note?.datetime = Calendar.getInstance().time
+        note?.timeEdit = date
+        note?.timeView = date
         note?.color = noteColor
     }
 
@@ -166,7 +168,14 @@ class EditFragment : Fragment() {
         val noteDescription = editDescription?.text.toString()
         val noteDate = Calendar.getInstance().time
         val noteColor = noteColor
-        note = Note(uniqueID, noteTitle, noteDescription, noteDate, noteColor)
+        note = Note(
+                id = uniqueID,
+                title = noteTitle,
+                description = noteDescription,
+                timeCreate = noteDate,
+                timeView = noteDate,
+                timeEdit = noteDate,
+                color = noteColor)
     }
 
     // endregion

@@ -20,10 +20,6 @@ class RecyclerViewAdapter(private val itemsContainer: ItemsContainer<Note>)
         val view = LayoutInflater
                 .from(parent?.context)
                 .inflate(R.layout.note_item, parent, false)
-//        val lp = RecyclerView.LayoutParams(
-//                ViewGroup.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.WRAP_CONTENT)
-//        view.layoutParams = lp
         return ViewHolder(view)
     }
 
@@ -37,7 +33,7 @@ class RecyclerViewAdapter(private val itemsContainer: ItemsContainer<Note>)
         holder?.title?.text = item.title
         holder?.description?.text = item.description
         holder?.color?.setBackgroundColor(item.color)
-        holder?.date?.text = dateFormat.format(item.datetime)
+        holder?.date?.text = dateFormat.format(item.timeEdit)
 
         holder?.onClickHandle = {
             itemsContainer.editItem(item)

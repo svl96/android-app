@@ -1,8 +1,8 @@
 package com.yandex.android.androidapp
 
 import android.content.res.Configuration
+import android.database.sqlite.SQLiteException
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -62,6 +62,16 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         setupNavigation()
     }
     // endregion
+
+    private fun dbHandler() {
+        val dbHelper = NotesDatabaseHelper(this)
+        val db = try {
+            dbHelper.writableDatabase
+        } catch (ex: SQLiteException) {
+            dbHelper.readableDatabase
+        }
+
+    }
 
     private fun setupNavigation() {
         navigationView?.setNavigationItemSelectedListener {
