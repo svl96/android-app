@@ -17,4 +17,11 @@
     <string name="about_text">About</string>
     <string name="about_app_title">About App</string>
     <string name="settings_title">Settings</string>
+    <string name="by_edit_time_text">Edit Time</string>
+    <string name="by_create_time_text">Create Time</string>
+    <string name="by_view_time_text">View Time</string>
+    <string name="sort_settings_title">Sort Notes By</string>
+    <string name="sort_order">Sort Order</string>
+    <string name="ascent_text">Ascent</string>
+    <string name="descent_text">Descent</string>
 </resources>

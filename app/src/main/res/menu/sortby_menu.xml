@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group>
+        <item
+            android:id="@+id/edit_time_item"
+            android:title="@string/by_edit_time_text" />
+        <item
+            android:id="@+id/create_time_item"
+            android:title="@string/by_create_time_text" />
+        <item
+            android:id="@+id/view_time_item"
+            android:title="@string/by_view_time_text" />
+    </group>
+</menu>

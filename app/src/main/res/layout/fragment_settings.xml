@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="?actionBarSize"
@@ -7,6 +8,7 @@
 
 
     <TextView
+        android:id="@+id/settings_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Settings"
@@ -15,7 +17,105 @@
         app:layout_constraintTop_toTopOf="parent"
         android:textAlignment="center"
         android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/sort_settings"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        app:layout_constraintTop_toBottomOf="@id/settings_header"
+        android:paddingTop="20dp">
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/sort_setting_first_line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="@dimen/title_text_size"
+            android:paddingStart="@dimen/text_padding_side"
+            android:paddingEnd="@dimen/text_padding_side"
+            android:text="@string/sort_settings_title"
+            android:textColor="@color/title_color"
+            />
+
+        <TextView
+            android:id="@+id/sort_setting_config"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/description_text_size"
+            app:layout_constraintTop_toBottomOf="@id/sort_setting_first_line"
+            app:layout_constraintLeft_toRightOf="parent"
+            android:paddingStart="@dimen/text_padding_side"
+            android:paddingEnd="@dimen/text_padding_side"
+            tools:text="Edit Time" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/sort_order"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        app:layout_constraintTop_toBottomOf="@id/sort_settings"
+        android:paddingTop="20dp">
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/sort_order_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="@dimen/title_text_size"
+            android:paddingStart="@dimen/text_padding_side"
+            android:paddingEnd="@dimen/text_padding_side"
+            android:text="@string/sort_order"
+            android:textColor="@color/title_color"
+            />
+
+        <TextView
+            android:id="@+id/sort_order_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/description_text_size"
+            app:layout_constraintTop_toBottomOf="@id/sort_order_title"
+            app:layout_constraintLeft_toRightOf="parent"
+            android:paddingStart="@dimen/text_padding_side"
+            android:paddingEnd="@dimen/text_padding_side"
+            tools:text="Descent" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/filter_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sort_order">
+
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/filter_by_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingEnd="@dimen/text_padding_side"
+            android:paddingStart="@dimen/text_padding_side"
+            android:text="Show Notes At"
+            android:textColor="@color/title_color"
+            android:textSize="@dimen/title_text_size"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/filter_by_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingEnd="@dimen/text_padding_side"
+            android:paddingStart="@dimen/text_padding_side"
+            android:textSize="@dimen/description_text_size"
+            app:layout_constraintLeft_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/filter_by_title"
+            tools:text="15 apr 2017" />
+
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

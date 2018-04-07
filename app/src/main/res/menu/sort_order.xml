@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group>
+        <item
+            android:id="@+id/sort_asc"
+            android:title="@string/ascent_text" />
+        <item
+            android:id="@+id/sort_desc"
+            android:title="@string/descent_text" />
+    </group>
+</menu>
