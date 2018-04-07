@@ -15,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.yandex.android.androidapp.*
 import com.yandex.android.androidapp.adapters.RecyclerViewAdapter
-import kotlin.collections.ArrayList
 
 
 class ListNotesFragment : Fragment(), ItemsContainer<Note> {
@@ -27,12 +26,13 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         }
     }
 
-    private var _notes : ArrayList<Note> = arrayListOf()
     private var _tag : String = "ListNotesFragment"
 
     private var _recyclerView: RecyclerView? = null
     private var _actionButton: FloatingActionButton? = null
     private var containerUi : ContainerUI? = null
+
+    private lateinit var notesContainer : NotesContainer
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -40,13 +40,16 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
             containerUi = context
         else
             throw IllegalStateException("Context should implement ContainerUI")
+
+        if (context is NotesContainer)
+            notesContainer = context
+        else
+            throw IllegalStateException("Context should implement NotesContainer")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val savedNotes = savedInstanceState?.getSerializable("NOTES") as ArrayList<*>?
-        savedNotes?.mapTo(_notes, { s -> s as Note })
+        Log.d(tag, "onCreate()")
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -64,8 +67,6 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         Log.d(tag, "onSaveInstantState()")
-
-        outState?.putSerializable("NOTES", _notes)
         super.onSaveInstanceState(outState)
     }
 
@@ -88,8 +89,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         }
     }
 
-    override fun getItems(): ArrayList<Note> {
-        return _notes
+    override fun getItems(): Array<Note> {
+        return notesContainer.getNotes()
     }
 
     // region Create Note
@@ -106,8 +107,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
 
     private fun addNoteItem(note: Note) {
-        _notes.add(note)
-        _recyclerView?.adapter?.notifyItemInserted(_notes.size - 1)
+        notesContainer.addNote(note)
+        _recyclerView?.adapter?.notifyItemInserted(getItems().size - 1)
     }
 
     // endregion
@@ -124,8 +125,9 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     private fun updateNoteItem(editedNote: Note) {
-        val index = _notes.indexOfFirst{ note -> note.id == editedNote.id }
-        _notes[index] = editedNote
+        notesContainer.updateNote(editedNote)
+        val notes = getItems()
+        val index = notes.indexOfFirst{ note -> note.id == editedNote.id }
         _recyclerView?.adapter?.notifyItemChanged(index)
     }
 
@@ -146,7 +148,9 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     private fun deleteNote(position: Int) {
-        _notes.removeAt(position)
+        val note = getItems()[position]
+        notesContainer.deleteNote(note)
+
         _recyclerView?.adapter?.notifyItemRemoved(position)
     }
 

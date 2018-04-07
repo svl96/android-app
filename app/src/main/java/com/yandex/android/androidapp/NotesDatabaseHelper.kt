@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.provider.BaseColumns
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class NotesDatabaseHelper(context: Context?)
     : SQLiteOpenHelper(context, DATABASE_NAME, null, VERSION) {
@@ -36,6 +37,7 @@ class NotesDatabaseHelper(context: Context?)
         // queries
         private const val SQL_CREATE_TABLE_NOTES = "CREATE TABLE $TABLE_NOTES " +
                 "( $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "$COLUMN_NOTE_ID TEXT," +
                 "$COLUMN_TITLE TEXT," +
                 "$COLUMN_DESCRIPTION TEXT," +
                 "$COLUMN_COLOR TEXT," +
@@ -46,7 +48,7 @@ class NotesDatabaseHelper(context: Context?)
         private const val SQL_DROP_TABLE_NOTES = "DROP TABLE IF EXIST $TABLE_NOTES"
 
         // formats
-        private const val dateFormatString : String = "yyyy-MM-dd'T'HH:mm:ssXXX"
+        private const val dateFormatString : String = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -61,16 +63,16 @@ class NotesDatabaseHelper(context: Context?)
 
     private fun fillData(db: SQLiteDatabase?) {
         // добавление данных, возможно из assets
-        addNote(db, "testid1", "Note 1", "Descr 1", "#fff",
-                parseDate("2017-04-24T12:00:00+05:00"),
-                parseDate("2017-04-24T12:20:00+05:00"),
-                parseDate("2017-04-24T12:20:00+05:00")
+        addNote(db, "testid1", "Note 1", "Descr 1", "#ff0000",
+                parseDate("2017-04-24T12:00:00.000+05:00"),
+                parseDate("2017-04-24T12:20:00.000+05:00"),
+                parseDate("2017-04-24T12:20:00.000+05:00")
                 )
 
-        addNote(db,"testid2", "Note 2", "Descr 2", "#000",
-                parseDate("2017-04-26T15:00:00+05:00"),
-                parseDate("2017-04-26T15:20:00+05:00"),
-                parseDate("2017-04-26T15:20:00+05:00")
+        addNote(db,"testid2", "Note 2", "Descr 2", "#00ff00",
+                parseDate("2017-04-26T15:00:00.000+05:00"),
+                parseDate("2017-04-26T15:20:00.000+05:00"),
+                parseDate("2017-04-26T15:20:00.000+05:00")
         )
     }
 
@@ -80,7 +82,7 @@ class NotesDatabaseHelper(context: Context?)
         contentValues.put(COLUMN_NOTE_ID, note.id)
         contentValues.put(COLUMN_TITLE, note.title)
         contentValues.put(COLUMN_DESCRIPTION, note.description)
-        contentValues.put(COLUMN_COLOR, note.color)
+        contentValues.put(COLUMN_COLOR, getHEXColor(note.color))
         contentValues.put(COLUMN_CREATE_TIME, note.timeCreate.time)
         contentValues.put(COLUMN_EDIT_TIME, note.timeEdit.time)
         contentValues.put(COLUMN_VIEW_TIME, note.timeView.time)
@@ -160,7 +162,7 @@ class NotesDatabaseHelper(context: Context?)
 
     // region Select Notes
 
-    fun getAllNotes(sortColumn : String = COLUMN_EDIT_TIME, orderDesc : Boolean = true ) : List<Note> {
+    fun getAllNotes(sortColumn : String = COLUMN_EDIT_TIME, orderDesc : Boolean = true ) : Array<Note> {
         return getFilterByDateRangeNotes(sortColumn = sortColumn, orderDesc = orderDesc,
                 startDate = null, endDate = null)
     }
@@ -168,7 +170,7 @@ class NotesDatabaseHelper(context: Context?)
     fun getFilterByDateNotes( date : Calendar,
                               sortColumn : String = COLUMN_EDIT_TIME,
                               filterColumn : String = COLUMN_EDIT_TIME,
-                              orderDesc : Boolean = true) : List<Note> {
+                              orderDesc : Boolean = true) : Array<Note> {
 
         return getFilterByDateRangeNotes(date, date, sortColumn, filterColumn, orderDesc)
     }
@@ -176,11 +178,11 @@ class NotesDatabaseHelper(context: Context?)
     fun getFilterByDateRangeNotes(startDate : Calendar?, endDate : Calendar?,
                                   sortColumn : String = COLUMN_EDIT_TIME,
                                   filterColumn : String = COLUMN_EDIT_TIME,
-                                  orderDesc : Boolean = true) : List<Note> {
+                                  orderDesc : Boolean = true) : Array<Note> {
 
         val notes = mutableListOf<Note>()
 
-        val columns = arrayOf(COLUMN_ID, COLUMN_TITLE, COLUMN_DESCRIPTION,
+        val columns = arrayOf(COLUMN_ID, COLUMN_NOTE_ID, COLUMN_TITLE, COLUMN_DESCRIPTION,
                 COLUMN_COLOR, COLUMN_CREATE_TIME, COLUMN_EDIT_TIME, COLUMN_VIEW_TIME)
         val sortOrder = if (orderDesc) "$sortColumn DESC" else "$sortColumn ASC"
         var selection : String? = null
@@ -200,18 +202,25 @@ class NotesDatabaseHelper(context: Context?)
                     selectionArgs,
                     null,
                     null,
-                    sortOrder
+                    null
             )
             if (cursor.moveToFirst()) {
                 do {
+                    val id = cursor.getString(1)
+                    val title = cursor.getString(2)
+                    val description = cursor.getString(3)
+                    val color = cursor.getString(4)
+                    val timeCreate = cursor.getLong(5)
+                    val timeEdit = cursor.getLong(6)
+                    val timeView = cursor.getLong(7)
                     notes.add(Note(
-                            id = cursor.getString(0),
-                            title = cursor.getString(1),
-                            description = cursor.getString(2),
-                            color = Color.parseColor(cursor.getString(3)),
-                            timeCreate = parseDate(cursor.getString(4)),
-                            timeEdit = parseDate(cursor.getString(5)),
-                            timeView = parseDate(cursor.getString(6))
+                            id = cursor.getString(1),
+                            title = cursor.getString(2),
+                            description = cursor.getString(3),
+                            color = Color.parseColor(color),
+                            timeCreate = Date(timeCreate),
+                            timeEdit = Date(timeEdit),
+                            timeView = Date(timeView)
                     ))
                 } while (cursor.moveToNext())
             }
@@ -221,7 +230,7 @@ class NotesDatabaseHelper(context: Context?)
             db.close()
         }
 
-        return notes
+        return notes.toTypedArray()
     }
 
     private fun getFormattedDateRange(startDate: Calendar, endDate : Calendar) : Array<String> {
@@ -256,8 +265,8 @@ class NotesDatabaseHelper(context: Context?)
         val red = (color shr 16) and 0xff
         val green = (color shr 8) and 0xff
         val blue = color and 0xff
-
-        return "#%02x%02x%02x".format(red, green, blue)
+        val hexColor = "#%02x%02x%02x".format(red, green, blue)
+        return hexColor
     }
 
     private fun parseDate(string: String) : Date {

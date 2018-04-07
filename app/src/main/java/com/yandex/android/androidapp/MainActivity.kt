@@ -1,7 +1,6 @@
 package com.yandex.android.androidapp
 
 import android.content.res.Configuration
-import android.database.sqlite.SQLiteException
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -27,12 +26,14 @@ const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
 const val GET_COLOR_REQUEST : Int = 3
 
-class MainActivity : AppCompatActivity(), ContainerUI  {
+class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
+
     private val tag = "MainActivity"
 
     private var drawerLayout: DrawerLayout? = null
     private var navigationView: NavigationView? = null
-
+    private var _notes : Array<Note> = arrayOf()
+    private var databaseHelper : NotesDatabaseHelper? = null
 
     // region Setup Activity
 
@@ -40,6 +41,9 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d("MainTesting", "onCreate()")
+
+        databaseHelper = NotesDatabaseHelper(this)
+        uploadFromDatabase()
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -51,7 +55,6 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
             supportFragmentManager
                     .beginTransaction()
                     .add(R.id.fragment_container, fragment, "ListNotesFragment")
-                    .addToBackStack(null)
                     .commit()
         }
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -62,16 +65,6 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         setupNavigation()
     }
     // endregion
-
-    private fun dbHandler() {
-        val dbHelper = NotesDatabaseHelper(this)
-        val db = try {
-            dbHelper.writableDatabase
-        } catch (ex: SQLiteException) {
-            dbHelper.readableDatabase
-        }
-
-    }
 
     private fun setupNavigation() {
         navigationView?.setNavigationItemSelectedListener {
@@ -125,7 +118,6 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         return true
     }
 
-
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         closeKeyboard()
         if (item?.itemId == 16908332)
@@ -157,5 +149,33 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         }
     }
 
+    private fun uploadFromDatabase()  {
+        _notes = databaseHelper?.getAllNotes() ?: arrayOf()
+    }
 
+    override fun getNotes(): Array<Note> {
+        Log.d(tag, "getNotes()")
+        Log.d(tag, _notes.contentDeepToString())
+
+        return _notes
+    }
+
+    override fun deleteNote(note: Note): Boolean {
+        val deleteRes = databaseHelper?.deleteNote(note)
+        uploadFromDatabase()
+
+        return deleteRes != 0
+    }
+
+    override fun updateNote(note: Note): Boolean {
+        val updateRes = databaseHelper?.updateNote(note)
+        uploadFromDatabase()
+
+        return  updateRes != 0
+    }
+
+    override fun addNote(note: Note) {
+        databaseHelper?.addNotes(listOf(note))
+        uploadFromDatabase()
+    }
 }
