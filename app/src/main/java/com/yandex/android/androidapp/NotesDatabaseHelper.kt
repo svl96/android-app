@@ -34,6 +34,13 @@ class NotesDatabaseHelper(context: Context?)
         const val COLUMN_EDIT_TIME: String = "edit_time"
         const val COLUMN_VIEW_TIME: String = "view_time"
 
+        const val DEFAULT_SORT_COLUMN = COLUMN_EDIT_TIME
+        const val DEFAULT_FILTER_COLUMN = COLUMN_EDIT_TIME
+        const val DESCENT_SORT_ORDER = "DESC"
+        const val ASCENT_SORT_ORDER = "ASC"
+
+        const val DEFAULT_SORT_ORDER = DESCENT_SORT_ORDER
+
         // queries
         private const val SQL_CREATE_TABLE_NOTES = "CREATE TABLE $TABLE_NOTES " +
                 "( $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -162,29 +169,30 @@ class NotesDatabaseHelper(context: Context?)
 
     // region Select Notes
 
-    fun getAllNotes(sortColumn : String = COLUMN_EDIT_TIME, orderDesc : Boolean = true ) : Array<Note> {
-        return getFilterByDateRangeNotes(sortColumn = sortColumn, orderDesc = orderDesc,
+    fun getAllNotes(sortColumn : String = DEFAULT_SORT_COLUMN,
+                    sortOrder : String = DEFAULT_SORT_ORDER ) : Array<Note> {
+        return getFilterByDateRangeNotes(sortColumn = sortColumn, sortOrder = sortOrder,
                 startDate = null, endDate = null)
     }
 
-    fun getFilterByDateNotes( date : Calendar,
-                              sortColumn : String = COLUMN_EDIT_TIME,
-                              filterColumn : String = COLUMN_EDIT_TIME,
-                              orderDesc : Boolean = true) : Array<Note> {
+    fun getFilterByDateNotes( date : Calendar? = null,
+                              sortColumn : String = DEFAULT_SORT_COLUMN,
+                              filterColumn : String = DEFAULT_FILTER_COLUMN,
+                              sortOrder : String = DEFAULT_SORT_ORDER) : Array<Note> {
 
-        return getFilterByDateRangeNotes(date, date, sortColumn, filterColumn, orderDesc)
+        return getFilterByDateRangeNotes(date, date, sortColumn, filterColumn, sortOrder)
     }
 
     fun getFilterByDateRangeNotes(startDate : Calendar?, endDate : Calendar?,
-                                  sortColumn : String = COLUMN_EDIT_TIME,
-                                  filterColumn : String = COLUMN_EDIT_TIME,
-                                  orderDesc : Boolean = true) : Array<Note> {
+                                  sortColumn : String = DEFAULT_SORT_COLUMN,
+                                  filterColumn : String = DEFAULT_FILTER_COLUMN,
+                                  sortOrder : String = DEFAULT_SORT_ORDER) : Array<Note> {
 
         val notes = mutableListOf<Note>()
 
         val columns = arrayOf(COLUMN_ID, COLUMN_NOTE_ID, COLUMN_TITLE, COLUMN_DESCRIPTION,
                 COLUMN_COLOR, COLUMN_CREATE_TIME, COLUMN_EDIT_TIME, COLUMN_VIEW_TIME)
-        val sortOrder = if (orderDesc) "$sortColumn DESC" else "$sortColumn ASC"
+        val sortArg = "$sortColumn $sortOrder"
         var selection : String? = null
         var selectionArgs : Array<String>? = null
 
@@ -202,7 +210,7 @@ class NotesDatabaseHelper(context: Context?)
                     selectionArgs,
                     null,
                     null,
-                    null
+                    sortArg
             )
             if (cursor.moveToFirst()) {
                 do {
@@ -214,9 +222,9 @@ class NotesDatabaseHelper(context: Context?)
                     val timeEdit = cursor.getLong(6)
                     val timeView = cursor.getLong(7)
                     notes.add(Note(
-                            id = cursor.getString(1),
-                            title = cursor.getString(2),
-                            description = cursor.getString(3),
+                            id = id,
+                            title = title,
+                            description = description,
                             color = Color.parseColor(color),
                             timeCreate = Date(timeCreate),
                             timeEdit = Date(timeEdit),
@@ -237,9 +245,22 @@ class NotesDatabaseHelper(context: Context?)
         val outStartDate = truncateDateByDay(startDate)
         val outEndDate = truncateDateByDay(endDate)
 
-        outStartDate.timeZone = Calendar.getInstance().timeZone
-        outEndDate.timeZone = Calendar.getInstance().timeZone
+        val oldtimezone = outStartDate.timeZone
+
+        val timeZone = Calendar.getInstance().timeZone
+        outStartDate.timeZone = timeZone
+        outEndDate.timeZone = timeZone
         outEndDate.add(Calendar.DAY_OF_MONTH, 1)
+
+        val startYear = outStartDate[Calendar.YEAR]
+        val startMonth = outStartDate[Calendar.MONTH]
+        val startDay = outStartDate[Calendar.DAY_OF_MONTH]
+
+        val EndYear = outEndDate[Calendar.YEAR]
+        val EndMonth = outEndDate[Calendar.MONTH]
+        val endDay = outEndDate[Calendar.DAY_OF_MONTH]
+
+
 
         val startTime = outStartDate.time.time.toString()
         val endTime = outEndDate.time.time.toString()
@@ -256,7 +277,8 @@ class NotesDatabaseHelper(context: Context?)
         outDate.set(
                 date[Calendar.YEAR],
                 date[Calendar.MONTH],
-                date[Calendar.DAY_OF_MONTH])
+                date[Calendar.DAY_OF_MONTH],
+                0, 0, 0)
 
         return outDate
     }

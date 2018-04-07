@@ -33,7 +33,7 @@ class RecyclerViewAdapter(private val itemsContainer: ItemsContainer<Note>)
         holder?.title?.text = item.title
         holder?.description?.text = item.description
         holder?.color?.setBackgroundColor(item.color)
-        holder?.date?.text = dateFormat.format(item.timeEdit)
+        holder?.date?.text = dateFormat.format(item.timeCreate)
 
         holder?.onClickHandle = {
             itemsContainer.editItem(item)

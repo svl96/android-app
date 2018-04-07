@@ -1,5 +1,7 @@
 package com.yandex.android.androidapp
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
@@ -16,11 +18,16 @@ import com.yandex.android.androidapp.fragments.ListNotesFragment
 import android.view.inputmethod.InputMethodManager
 import com.yandex.android.androidapp.fragments.AboutAppFragment
 import com.yandex.android.androidapp.fragments.SettingsFragment
+import java.util.*
 
 
 const val EXTRA_NOTE : String = "com.yandex.android.EXTRA_NOTE"
 const val EXTRA_EDIT_MODE : String = "com.yandex.android.EXTRA_EDIT_MODE"
 const val EXTRA_COLOR : String = "com.yandex.android.EXTRA_COLOR"
+const val APP_PREFERENCES = "mysettings"
+const val SHARED_SORT_BY = "SHARED_SORT_BY"
+const val SHARED_SORT_ORDER = "SHARED_SORT_ORDER"
+const val SHARED_FILTER_DATE = "SHARED_FILTER_DATE"
 const val DEFAULT_COLOR : Int = Color.RED
 const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
@@ -34,6 +41,7 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
     private var navigationView: NavigationView? = null
     private var _notes : Array<Note> = arrayOf()
     private var databaseHelper : NotesDatabaseHelper? = null
+    private var sharedPreferences : SharedPreferences? = null
 
     // region Setup Activity
 
@@ -42,8 +50,10 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
         setContentView(R.layout.activity_main)
         Log.d("MainTesting", "onCreate()")
 
+        sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+
         databaseHelper = NotesDatabaseHelper(this)
-        uploadFromDatabase()
+        updateData()
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -82,6 +92,7 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
             supportFragmentManager
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment, tag)
+                    .addToBackStack(null)
                     .commit()
         }
         drawerLayout?.closeDrawer(GravityCompat.START)
@@ -149,10 +160,6 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
         }
     }
 
-    private fun uploadFromDatabase()  {
-        _notes = databaseHelper?.getAllNotes() ?: arrayOf()
-    }
-
     override fun getNotes(): Array<Note> {
         Log.d(tag, "getNotes()")
         Log.d(tag, _notes.contentDeepToString())
@@ -162,20 +169,44 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
 
     override fun deleteNote(note: Note): Boolean {
         val deleteRes = databaseHelper?.deleteNote(note)
-        uploadFromDatabase()
+        updateData()
 
         return deleteRes != 0
     }
 
     override fun updateNote(note: Note): Boolean {
         val updateRes = databaseHelper?.updateNote(note)
-        uploadFromDatabase()
+        updateData()
 
         return  updateRes != 0
     }
 
     override fun addNote(note: Note) {
         databaseHelper?.addNotes(listOf(note))
-        uploadFromDatabase()
+        updateData()
     }
+
+    override fun updateData() {
+
+        val sortByParam = when(sharedPreferences?.getString(SHARED_SORT_BY, "")) {
+            getString(R.string.by_edit_time_text) -> NotesDatabaseHelper.COLUMN_EDIT_TIME
+            getString(R.string.by_create_time_text) -> NotesDatabaseHelper.COLUMN_CREATE_TIME
+            getString(R.string.by_view_time_text) -> NotesDatabaseHelper.COLUMN_VIEW_TIME
+            else -> NotesDatabaseHelper.DEFAULT_SORT_COLUMN
+        }
+        val sortOrderParam = when(sharedPreferences?.getString(SHARED_SORT_ORDER, "")) {
+            getString(R.string.ascent_text) -> NotesDatabaseHelper.ASCENT_SORT_ORDER
+            getString(R.string.descent_text) -> NotesDatabaseHelper.DESCENT_SORT_ORDER
+            else -> NotesDatabaseHelper.DEFAULT_SORT_ORDER
+        }
+
+        val date  = sharedPreferences?.getLong(SHARED_FILTER_DATE,
+                -1) ?: -1
+        val filterParam = if (date > 0) Calendar.getInstance() else null
+        filterParam?.time = Date(date)
+
+        _notes = databaseHelper?.
+                getFilterByDateNotes(filterParam, sortByParam, sortByParam, sortOrderParam) ?: arrayOf()
+    }
+
 }

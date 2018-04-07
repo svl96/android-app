@@ -6,4 +6,6 @@ interface ContainerUI {
 
     fun closeKeyboard()
 
+    fun updateData()
+
 }
