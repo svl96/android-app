@@ -2,6 +2,10 @@ package com.yandex.android.androidapp
 
 interface NotesContainer {
 
+    fun getAllNotes() : Array<Note>
+
+    fun addNotes(notes: Array<Note>)
+
     fun getNotes() : Array<Note>
 
     fun deleteNote(note: Note) : Boolean

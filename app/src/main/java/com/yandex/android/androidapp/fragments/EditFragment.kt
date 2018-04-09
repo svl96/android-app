@@ -202,12 +202,24 @@ class EditFragment : Fragment() {
 
     }
 
+    private fun updateTimeViewValue() : Boolean {
+        val date = Calendar.getInstance().time
+        if (note != null) {
+            note?.timeView = date
+            return true
+        }
+        return false
+    }
+
     fun onBackPressed() {
-        if (isDataChanged()) {
-            val dialog = createBackPressDialog()
-            dialog.show()
-        } else
-            fragmentManager.popBackStack()
+        when {
+            isDataChanged() -> {
+                val dialog = createBackPressDialog()
+                dialog.show()
+            }
+            updateTimeViewValue() -> sendNote()
+            else -> fragmentManager.popBackStack()
+        }
     }
 
 }

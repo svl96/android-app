@@ -1,23 +1,24 @@
 package com.yandex.android.androidapp
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.MenuItem
-import com.yandex.android.androidapp.fragments.EditFragment
-import com.yandex.android.androidapp.fragments.ListNotesFragment
 import android.view.inputmethod.InputMethodManager
-import com.yandex.android.androidapp.fragments.AboutAppFragment
-import com.yandex.android.androidapp.fragments.SettingsFragment
+import com.yandex.android.androidapp.fragments.*
 import java.util.*
 
 
@@ -27,11 +28,17 @@ const val EXTRA_COLOR : String = "com.yandex.android.EXTRA_COLOR"
 const val APP_PREFERENCES = "mysettings"
 const val SHARED_SORT_BY = "SHARED_SORT_BY"
 const val SHARED_SORT_ORDER = "SHARED_SORT_ORDER"
+const val SHARED_FILTER_BY = "SHARED_FILTER_BY"
 const val SHARED_FILTER_DATE = "SHARED_FILTER_DATE"
+const val SHARED_FILTER_ENABLE = "SHARED_FILTER_ENABLE"
 const val DEFAULT_COLOR : Int = Color.RED
 const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
 const val GET_COLOR_REQUEST : Int = 3
+
+private val REQUEST_EXTERNAL_STORAGE = 1
+private val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
 class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
 
@@ -76,11 +83,26 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
     }
     // endregion
 
+    fun verifyStoragePermissions(activity: Activity) {
+        // Check if we have write permission
+        val permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            )
+        }
+    }
+
     private fun setupNavigation() {
         navigationView?.setNavigationItemSelectedListener {
             when(it.itemId) {
                 R.id.home_item -> onHomeSelected()
                 R.id.settings_item -> onSettingsSelected()
+                R.id.import_export_item -> onImportExportSelected()
                 R.id.about_item -> onAboutAppSelected()
                 else -> true
             }
@@ -103,6 +125,17 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
         var fragment = supportFragmentManager.findFragmentByTag(tag)
         if (fragment == null)
             fragment = ListNotesFragment.newInstance()
+
+        openSelectedFragment(tag, fragment)
+        return true
+    }
+
+    private fun onImportExportSelected(): Boolean {
+        verifyStoragePermissions(this)
+        val tag = "ImportExportFragment"
+        var fragment = supportFragmentManager.findFragmentByTag(tag)
+        if (fragment == null)
+            fragment = ImportExportFragmet.newInstance()
 
         openSelectedFragment(tag, fragment)
         return true
@@ -160,10 +193,11 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
         }
     }
 
-    override fun getNotes(): Array<Note> {
-        Log.d(tag, "getNotes()")
-        Log.d(tag, _notes.contentDeepToString())
+    override fun getAllNotes() : Array<Note> {
+        return databaseHelper?.getAllNotes() ?: arrayOf()
+    }
 
+    override fun getNotes(): Array<Note> {
         return _notes
     }
 
@@ -181,32 +215,51 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
         return  updateRes != 0
     }
 
+    override fun addNotes(notes: Array<Note>) {
+        databaseHelper?.importNotes(notes.asList())
+        updateData()
+    }
+
     override fun addNote(note: Note) {
         databaseHelper?.addNotes(listOf(note))
         updateData()
     }
 
-    override fun updateData() {
-
-        val sortByParam = when(sharedPreferences?.getString(SHARED_SORT_BY, "")) {
+    private fun getTimeColumn(sharedKey: String, defaultColumn: String) : String {
+        return when(sharedPreferences?.getString(sharedKey, "")) {
             getString(R.string.by_edit_time_text) -> NotesDatabaseHelper.COLUMN_EDIT_TIME
             getString(R.string.by_create_time_text) -> NotesDatabaseHelper.COLUMN_CREATE_TIME
             getString(R.string.by_view_time_text) -> NotesDatabaseHelper.COLUMN_VIEW_TIME
-            else -> NotesDatabaseHelper.DEFAULT_SORT_COLUMN
+            else -> defaultColumn
         }
+    }
+
+    override fun updateData() {
+
+        val sortByColumn = getTimeColumn(SHARED_SORT_BY, NotesDatabaseHelper.DEFAULT_SORT_COLUMN)
+
+        val filterByColumn = getTimeColumn(SHARED_FILTER_BY, NotesDatabaseHelper.DEFAULT_FILTER_COLUMN)
+
         val sortOrderParam = when(sharedPreferences?.getString(SHARED_SORT_ORDER, "")) {
             getString(R.string.ascent_text) -> NotesDatabaseHelper.ASCENT_SORT_ORDER
             getString(R.string.descent_text) -> NotesDatabaseHelper.DESCENT_SORT_ORDER
             else -> NotesDatabaseHelper.DEFAULT_SORT_ORDER
         }
 
+        val filterEnable = sharedPreferences?.getBoolean(SHARED_FILTER_ENABLE, false) ?: false
+
         val date  = sharedPreferences?.getLong(SHARED_FILTER_DATE,
                 -1) ?: -1
-        val filterParam = if (date > 0) Calendar.getInstance() else null
+
+        val filterParam = if (filterEnable && date > 0 ) Calendar.getInstance() else null
         filterParam?.time = Date(date)
 
         _notes = databaseHelper?.
-                getFilterByDateNotes(filterParam, sortByParam, sortByParam, sortOrderParam) ?: arrayOf()
+                getFilterByDateNotes(
+                        date = filterParam,
+                        sortColumn = sortByColumn,
+                        filterColumn = filterByColumn,
+                        sortOrder = sortOrderParam) ?: arrayOf()
     }
 
 }

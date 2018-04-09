@@ -17,6 +17,7 @@
     <string name="about_text">About</string>
     <string name="about_app_title">About App</string>
     <string name="settings_title">Settings</string>
+    <string name="import_export_title">Import/Export</string>
     <string name="by_edit_time_text">Edit Time</string>
     <string name="by_create_time_text">Create Time</string>
     <string name="by_view_time_text">View Time</string>
@@ -24,4 +25,9 @@
     <string name="sort_order">Sort Order</string>
     <string name="ascent_text">Ascent</string>
     <string name="descent_text">Descent</string>
+    <string name="import_export_text">Import/Export</string>
+    <string name="import_button_text">import notes</string>
+    <string name="export_button_text">export notes</string>
+    <string name="filter_switcher_label">Enable Notes Filter</string>
+    <string name="filter_notes_by">Filter Notes By</string>
 </resources>

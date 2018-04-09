@@ -52,7 +52,7 @@ class NotesDatabaseHelper(context: Context?)
                 "$COLUMN_EDIT_TIME INTEGER," +
                 "$COLUMN_VIEW_TIME INTEGER )"
 
-        private const val SQL_DROP_TABLE_NOTES = "DROP TABLE IF EXIST $TABLE_NOTES"
+        private const val SQL_DROP_TABLE_NOTES = "DROP TABLE IF EXISTS $TABLE_NOTES"
 
         // formats
         private const val dateFormatString : String = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
@@ -64,8 +64,15 @@ class NotesDatabaseHelper(context: Context?)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db?.execSQL(SQL_DROP_TABLE_NOTES)
+
         onCreate(db)
+    }
+
+    fun importNotes(notes: List<Note>) {
+        val db = writableDatabase
+        db?.execSQL(SQL_DROP_TABLE_NOTES)
+        db?.execSQL(SQL_CREATE_TABLE_NOTES)
+        addNotes(notes)
     }
 
     private fun fillData(db: SQLiteDatabase?) {

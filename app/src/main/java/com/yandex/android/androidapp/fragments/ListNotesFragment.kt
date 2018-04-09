@@ -151,7 +151,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         val note = getItems()[position]
         notesContainer.deleteNote(note)
 
-        _recyclerView?.adapter?.notifyItemRemoved(position)
+        _recyclerView?.adapter?.notifyDataSetChanged()
     }
 
     override fun deleteItem(position: Int) : Boolean {
