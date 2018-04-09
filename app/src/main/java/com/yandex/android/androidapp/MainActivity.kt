@@ -40,13 +40,13 @@ private val REQUEST_EXTERNAL_STORAGE = 1
 private val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
+class MainActivity : AppCompatActivity(), ContainerUI  {
 
     private val tag = "MainActivity"
 
     private var drawerLayout: DrawerLayout? = null
     private var navigationView: NavigationView? = null
-    private var _notes : Array<Note> = arrayOf()
+    private var notesContainer: NotesContainer? = null
     private var databaseHelper : NotesDatabaseHelper? = null
     private var sharedPreferences : SharedPreferences? = null
 
@@ -60,6 +60,8 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
         sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
 
         databaseHelper = NotesDatabaseHelper(this)
+        notesContainer = NotesContainer(databaseHelper!!)
+
         updateData()
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -83,7 +85,7 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
     }
     // endregion
 
-    fun verifyStoragePermissions(activity: Activity) {
+    private fun verifyStoragePermissions(activity: Activity) {
         // Check if we have write permission
         val permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
@@ -193,38 +195,6 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
         }
     }
 
-    override fun getAllNotes() : Array<Note> {
-        return databaseHelper?.getAllNotes() ?: arrayOf()
-    }
-
-    override fun getNotes(): Array<Note> {
-        return _notes
-    }
-
-    override fun deleteNote(note: Note): Boolean {
-        val deleteRes = databaseHelper?.deleteNote(note)
-        updateData()
-
-        return deleteRes != 0
-    }
-
-    override fun updateNote(note: Note): Boolean {
-        val updateRes = databaseHelper?.updateNote(note)
-        updateData()
-
-        return  updateRes != 0
-    }
-
-    override fun addNotes(notes: Array<Note>) {
-        databaseHelper?.importNotes(notes.asList())
-        updateData()
-    }
-
-    override fun addNote(note: Note) {
-        databaseHelper?.addNotes(listOf(note))
-        updateData()
-    }
-
     private fun getTimeColumn(sharedKey: String, defaultColumn: String) : String {
         return when(sharedPreferences?.getString(sharedKey, "")) {
             getString(R.string.by_edit_time_text) -> NotesDatabaseHelper.COLUMN_EDIT_TIME
@@ -235,6 +205,7 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
     }
 
     override fun updateData() {
+        val sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
 
         val sortByColumn = getTimeColumn(SHARED_SORT_BY, NotesDatabaseHelper.DEFAULT_SORT_COLUMN)
 
@@ -254,12 +225,15 @@ class MainActivity : AppCompatActivity(), ContainerUI, NotesContainer  {
         val filterParam = if (filterEnable && date > 0 ) Calendar.getInstance() else null
         filterParam?.time = Date(date)
 
-        _notes = databaseHelper?.
-                getFilterByDateNotes(
-                        date = filterParam,
-                        sortColumn = sortByColumn,
-                        filterColumn = filterByColumn,
-                        sortOrder = sortOrderParam) ?: arrayOf()
+        notesContainer?.setSelectParams(filterParam, filterParam,
+                sortByColumn, filterByColumn, sortOrderParam)
+
+        notesContainer?.refreshData()
+
+    }
+
+    override fun getNotesContainer(): NotesContainerUI {
+        return notesContainer!!
     }
 
 }

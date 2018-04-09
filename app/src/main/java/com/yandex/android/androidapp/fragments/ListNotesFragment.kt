@@ -32,7 +32,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     private var _actionButton: FloatingActionButton? = null
     private var containerUi : ContainerUI? = null
 
-    private lateinit var notesContainer : NotesContainer
+    private var notesContainer : NotesContainerUI? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -40,11 +40,6 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
             containerUi = context
         else
             throw IllegalStateException("Context should implement ContainerUI")
-
-        if (context is NotesContainer)
-            notesContainer = context
-        else
-            throw IllegalStateException("Context should implement NotesContainer")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +49,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         containerUi?.setActivityTitle(R.string.list_title)
+
+        notesContainer = containerUi?.getNotesContainer()
 
         val rootView = inflater?.inflate(R.layout.fragment_list_notes, container, false)!!
         _actionButton = rootView.findViewById(R.id.FAB1)
@@ -90,7 +87,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     override fun getItems(): Array<Note> {
-        return notesContainer.getNotes()
+        return notesContainer?.getNotes() ?: arrayOf()
     }
 
     // region Create Note
@@ -107,8 +104,10 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
 
     private fun addNoteItem(note: Note) {
-        notesContainer.addNote(note)
-        _recyclerView?.adapter?.notifyItemInserted(getItems().size - 1)
+        if (notesContainer != null) {
+            notesContainer?.addNote(note)
+            _recyclerView?.adapter?.notifyItemInserted(getItems().size - 1)
+        }
     }
 
     // endregion
@@ -125,10 +124,12 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     private fun updateNoteItem(editedNote: Note) {
-        notesContainer.updateNote(editedNote)
-        val notes = getItems()
-        val index = notes.indexOfFirst{ note -> note.id == editedNote.id }
-        _recyclerView?.adapter?.notifyItemChanged(index)
+        if (notesContainer != null) {
+            notesContainer?.updateNote(editedNote)
+            val notes = getItems()
+            val index = notes.indexOfFirst { note -> note.id == editedNote.id }
+            _recyclerView?.adapter?.notifyItemChanged(index)
+        }
     }
 
     // endregion
@@ -149,9 +150,10 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     private fun deleteNote(position: Int) {
         val note = getItems()[position]
-        notesContainer.deleteNote(note)
-
-        _recyclerView?.adapter?.notifyDataSetChanged()
+        if (notesContainer != null) {
+            notesContainer?.deleteNote(note)
+            _recyclerView?.adapter?.notifyDataSetChanged()
+        }
     }
 
     override fun deleteItem(position: Int) : Boolean {

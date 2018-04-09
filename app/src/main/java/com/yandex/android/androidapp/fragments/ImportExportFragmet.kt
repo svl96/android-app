@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import com.yandex.android.androidapp.ContainerUI
 import com.yandex.android.androidapp.Note
-import com.yandex.android.androidapp.NotesContainer
+import com.yandex.android.androidapp.NotesContainerUI
 import com.yandex.android.androidapp.R
 import org.json.JSONArray
 import org.json.JSONException
@@ -32,7 +32,7 @@ class ImportExportFragmet : Fragment() {
     private val defaultFilename = "itemlist.ili"
 
     private var containerUi: ContainerUI? = null
-    private lateinit var notesContainer : NotesContainer
+    private var notesContainer : NotesContainerUI? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -41,15 +41,13 @@ class ImportExportFragmet : Fragment() {
         else
             throw IllegalStateException("Context should implement ContainerUI")
 
-        if (context is NotesContainer)
-            notesContainer = context
-        else
-            throw IllegalStateException("Context should implement NotesContainer")
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         containerUi?.setActivityTitle(R.string.import_export_title)
+        notesContainer = containerUi?.getNotesContainer()
+
         val rootView = inflater?.inflate(R.layout.fragment_import_export, container, false)!!
 
         val exportButton = rootView.findViewById<Button>(R.id.export_button)
@@ -64,10 +62,13 @@ class ImportExportFragmet : Fragment() {
     }
 
     private fun exportNotes() {
-
-        val notes = notesContainer.getAllNotes()
-        val json = createJson(notes)
-        writeInFile(defaultFilename, json)
+        if (notesContainer != null) {
+            val notes = notesContainer?.getAllNotes()
+            val json = createJson(notes!!)
+            writeInFile(defaultFilename, json)
+        } else {
+            Log.e(tag, "Notes Container is null")
+        }
     }
 
     private fun importNotes() {
@@ -75,9 +76,12 @@ class ImportExportFragmet : Fragment() {
         val json = readFromFile(defaultFilename)
         if (json == "")
             return
-
-        val notes = parseJson(json)
-        notesContainer.addNotes(notes)
+        if (notesContainer != null) {
+            val notes = parseJson(json)
+            notesContainer?.addNotes(notes)
+        } else {
+            Log.e(tag, "Notes Container is null")
+        }
     }
 
     private fun writeInFile(filename: String, text: String) {
