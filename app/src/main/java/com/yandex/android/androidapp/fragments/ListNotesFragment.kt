@@ -15,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.yandex.android.androidapp.*
 import com.yandex.android.androidapp.adapters.RecyclerViewAdapter
-import kotlin.collections.ArrayList
 
 
 class ListNotesFragment : Fragment(), ItemsContainer<Note> {
@@ -27,12 +26,13 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         }
     }
 
-    private var _notes : ArrayList<Note> = arrayListOf()
     private var _tag : String = "ListNotesFragment"
 
     private var _recyclerView: RecyclerView? = null
     private var _actionButton: FloatingActionButton? = null
     private var containerUi : ContainerUI? = null
+
+    private var notesContainer : NotesContainerUI? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -44,13 +44,18 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(_tag, "onCreate()")
 
-        val savedNotes = savedInstanceState?.getSerializable("NOTES") as ArrayList<*>?
-        savedNotes?.mapTo(_notes, { s -> s as Note })
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+
+        Log.d(_tag, "onCreateView()")
         containerUi?.setActivityTitle(R.string.list_title)
+
+        if (notesContainer == null) {
+            notesContainer = containerUi?.getNotesContainer()
+        }
 
         val rootView = inflater?.inflate(R.layout.fragment_list_notes, container, false)!!
         _actionButton = rootView.findViewById(R.id.FAB1)
@@ -64,8 +69,6 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         Log.d(tag, "onSaveInstantState()")
-
-        outState?.putSerializable("NOTES", _notes)
         super.onSaveInstanceState(outState)
     }
 
@@ -76,6 +79,9 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("onActivityResultTesting", resultCode.toString())
+        if (notesContainer == null) {
+            notesContainer = containerUi?.getNotesContainer()
+        }
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
             val note = data.getSerializableExtra(EXTRA_NOTE) as Note
@@ -88,8 +94,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         }
     }
 
-    override fun getItems(): ArrayList<Note> {
-        return _notes
+    override fun getItems(): Array<Note> {
+        return notesContainer?.getNotes() ?: arrayOf()
     }
 
     // region Create Note
@@ -106,8 +112,10 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
 
     private fun addNoteItem(note: Note) {
-        _notes.add(note)
-        _recyclerView?.adapter?.notifyItemInserted(_notes.size - 1)
+        if (notesContainer != null) {
+            notesContainer?.addNote(note)
+            _recyclerView?.adapter?.notifyItemInserted(getItems().size - 1)
+        }
     }
 
     // endregion
@@ -124,8 +132,11 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     private fun updateNoteItem(editedNote: Note) {
-        val index = _notes.indexOfFirst{ note -> note.id == editedNote.id }
-        _notes[index] = editedNote
+        Log.d(_tag, "UpdateNoteItem")
+
+        notesContainer?.updateNote(editedNote)
+        val notes = getItems()
+        val index = notes.indexOfFirst { note -> note.id == editedNote.id }
         _recyclerView?.adapter?.notifyItemChanged(index)
     }
 
@@ -146,8 +157,11 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     private fun deleteNote(position: Int) {
-        _notes.removeAt(position)
-        _recyclerView?.adapter?.notifyItemRemoved(position)
+        val note = getItems()[position]
+        if (notesContainer != null) {
+            notesContainer?.deleteNote(note)
+            _recyclerView?.adapter?.notifyDataSetChanged()
+        }
     }
 
     override fun deleteItem(position: Int) : Boolean {

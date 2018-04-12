@@ -49,7 +49,10 @@ class ColorPickerFragment : Fragment() {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
-        currentColorValue = arguments.getInt(EXTRA_COLOR)
+        if (savedInstanceState == null)
+            currentColorValue = arguments.getInt(EXTRA_COLOR)
+        else
+            currentColorValue = savedInstanceState.getInt("COLOR")
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -67,6 +70,12 @@ class ColorPickerFragment : Fragment() {
         drawScrollView()
 
         return rootView
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putInt("COLOR", currentColorValue)
+
+        super.onSaveInstanceState(outState)
     }
 
     // region Setup Color View

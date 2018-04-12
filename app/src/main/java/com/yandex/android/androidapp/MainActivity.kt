@@ -1,38 +1,54 @@
 package com.yandex.android.androidapp
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.MenuItem
-import com.yandex.android.androidapp.fragments.EditFragment
-import com.yandex.android.androidapp.fragments.ListNotesFragment
 import android.view.inputmethod.InputMethodManager
-import com.yandex.android.androidapp.fragments.AboutAppFragment
-import com.yandex.android.androidapp.fragments.SettingsFragment
+import com.yandex.android.androidapp.fragments.*
+import java.util.*
 
 
 const val EXTRA_NOTE : String = "com.yandex.android.EXTRA_NOTE"
 const val EXTRA_EDIT_MODE : String = "com.yandex.android.EXTRA_EDIT_MODE"
 const val EXTRA_COLOR : String = "com.yandex.android.EXTRA_COLOR"
+const val APP_PREFERENCES = "mysettings"
+const val SHARED_SORT_BY = "SHARED_SORT_BY"
+const val SHARED_SORT_ORDER = "SHARED_SORT_ORDER"
+const val SHARED_FILTER_BY = "SHARED_FILTER_BY"
+const val SHARED_FILTER_DATE = "SHARED_FILTER_DATE"
+const val SHARED_FILTER_ENABLE = "SHARED_FILTER_ENABLE"
 const val DEFAULT_COLOR : Int = Color.RED
 const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
 const val GET_COLOR_REQUEST : Int = 3
 
+private val REQUEST_EXTERNAL_STORAGE = 1
+private val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
 class MainActivity : AppCompatActivity(), ContainerUI  {
+
     private val tag = "MainActivity"
 
     private var drawerLayout: DrawerLayout? = null
     private var navigationView: NavigationView? = null
-
+    private var notesContainer: NotesContainer? = null
+    private var databaseHelper : NotesDatabaseHelper? = null
+    private var sharedPreferences : SharedPreferences? = null
 
     // region Setup Activity
 
@@ -40,6 +56,13 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d("MainTesting", "onCreate()")
+
+        sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+
+        databaseHelper = NotesDatabaseHelper(this)
+        notesContainer = NotesContainer(databaseHelper!!)
+
+        updateData()
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -51,7 +74,6 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
             supportFragmentManager
                     .beginTransaction()
                     .add(R.id.fragment_container, fragment, "ListNotesFragment")
-                    .addToBackStack(null)
                     .commit()
         }
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -63,11 +85,26 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
     }
     // endregion
 
+    private fun verifyStoragePermissions(activity: Activity) {
+        // Check if we have write permission
+        val permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            )
+        }
+    }
+
     private fun setupNavigation() {
         navigationView?.setNavigationItemSelectedListener {
             when(it.itemId) {
                 R.id.home_item -> onHomeSelected()
                 R.id.settings_item -> onSettingsSelected()
+                R.id.import_export_item -> onImportExportSelected()
                 R.id.about_item -> onAboutAppSelected()
                 else -> true
             }
@@ -79,6 +116,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
             supportFragmentManager
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment, tag)
+                    .addToBackStack(null)
                     .commit()
         }
         drawerLayout?.closeDrawer(GravityCompat.START)
@@ -89,6 +127,17 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         var fragment = supportFragmentManager.findFragmentByTag(tag)
         if (fragment == null)
             fragment = ListNotesFragment.newInstance()
+
+        openSelectedFragment(tag, fragment)
+        return true
+    }
+
+    private fun onImportExportSelected(): Boolean {
+        verifyStoragePermissions(this)
+        val tag = "ImportExportFragment"
+        var fragment = supportFragmentManager.findFragmentByTag(tag)
+        if (fragment == null)
+            fragment = ImportExportFragmet.newInstance()
 
         openSelectedFragment(tag, fragment)
         return true
@@ -114,7 +163,6 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
 
         return true
     }
-
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         closeKeyboard()
@@ -147,5 +195,45 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         }
     }
 
+    private fun getTimeColumn(sharedKey: String, defaultColumn: String) : String {
+        return when(sharedPreferences?.getString(sharedKey, "")) {
+            getString(R.string.by_edit_time_text) -> NotesDatabaseHelper.COLUMN_EDIT_TIME
+            getString(R.string.by_create_time_text) -> NotesDatabaseHelper.COLUMN_CREATE_TIME
+            getString(R.string.by_view_time_text) -> NotesDatabaseHelper.COLUMN_VIEW_TIME
+            else -> defaultColumn
+        }
+    }
+
+    override fun updateData() {
+        val sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+
+        val sortByColumn = getTimeColumn(SHARED_SORT_BY, NotesDatabaseHelper.DEFAULT_SORT_COLUMN)
+
+        val filterByColumn = getTimeColumn(SHARED_FILTER_BY, NotesDatabaseHelper.DEFAULT_FILTER_COLUMN)
+
+        val sortOrderParam = when(sharedPreferences?.getString(SHARED_SORT_ORDER, "")) {
+            getString(R.string.ascent_text) -> NotesDatabaseHelper.ASCENT_SORT_ORDER
+            getString(R.string.descent_text) -> NotesDatabaseHelper.DESCENT_SORT_ORDER
+            else -> NotesDatabaseHelper.DEFAULT_SORT_ORDER
+        }
+
+        val filterEnable = sharedPreferences?.getBoolean(SHARED_FILTER_ENABLE, false) ?: false
+
+        val date  = sharedPreferences?.getLong(SHARED_FILTER_DATE,
+                -1) ?: -1
+
+        val filterParam = if (filterEnable && date > 0 ) Calendar.getInstance() else null
+        filterParam?.time = Date(date)
+
+        notesContainer?.setSelectParams(filterParam, filterParam,
+                sortByColumn, filterByColumn, sortOrderParam)
+
+        notesContainer?.refreshData()
+
+    }
+
+    override fun getNotesContainer(): NotesContainerUI {
+        return notesContainer!!
+    }
 
 }

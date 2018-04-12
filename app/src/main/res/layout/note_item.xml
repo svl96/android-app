@@ -21,8 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/item_date"
-        app:layout_constraintLeft_toRightOf="@id/item_color"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         android:paddingTop="@dimen/title_padding_top"
         android:textSize="@dimen/title_text_size"
         android:singleLine="true"
@@ -53,9 +53,10 @@
         android:layout_marginTop="@dimen/date_margin_top"
         android:paddingStart="@dimen/text_padding_side"
         android:paddingEnd="@dimen/text_padding_side"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:textAlignment="textEnd"
         android:layout_height="wrap_content"
-        tools:text="12:00 12/12/2018"
+        tools:text="Edit at: 12:00"
         />
 
 

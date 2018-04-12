@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         />
 
-    <FrameLayout android:id="@+id/fragment_container"
+    <FrameLayout android:id="@+id/fragment_container_1"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -28,6 +28,15 @@
             android:background="@color/colorPrimary"
             app:titleTextColor="@color/toolbarTextColor"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"/>
+
+        <FrameLayout android:id="@+id/fragment_container"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".MainActivity"
+            android:paddingTop="?actionBarSize"
+            xmlns:app="http://schemas.android.com/apk/res-auto"/>
 
     </FrameLayout>
 

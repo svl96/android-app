@@ -3,7 +3,7 @@ package com.yandex.android.androidapp.fragments
 
 interface ItemsContainer<Item> {
 
-    fun getItems() : ArrayList<Item>
+    fun getItems() : Array<Item>
 
     fun createItem()
 

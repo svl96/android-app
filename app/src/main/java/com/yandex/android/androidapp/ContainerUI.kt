@@ -6,4 +6,8 @@ interface ContainerUI {
 
     fun closeKeyboard()
 
+    fun updateData()
+
+    fun getNotesContainer() : NotesContainerUI
+
 }

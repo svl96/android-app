@@ -46,7 +46,7 @@ class NotesAdapter(private val _context: Context, private val _notes: ArrayList<
         viewHolder.color?.setBackgroundColor(item.color)
         viewHolder.title?.text = item.title
         viewHolder.description?.text = item.description
-        viewHolder.date?.text = dateFormat.format(item.datetime)
+        viewHolder.date?.text = dateFormat.format(item.timeCreate)
 
         return customView!!
     }

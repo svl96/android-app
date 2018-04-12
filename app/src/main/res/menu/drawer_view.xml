@@ -6,6 +6,11 @@
             android:icon="@drawable/ic_home"
             android:title="@string/home_text" />
         <item
+            android:id="@+id/import_export_item"
+            android:icon="@drawable/ic_import_export"
+            android:title="@string/import_export_text"
+            />
+        <item
             android:id="@+id/settings_item"
             android:icon="@drawable/ic_settings"
             android:title="@string/settings_text" />

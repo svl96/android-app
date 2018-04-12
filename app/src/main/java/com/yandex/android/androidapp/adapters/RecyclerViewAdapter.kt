@@ -20,10 +20,6 @@ class RecyclerViewAdapter(private val itemsContainer: ItemsContainer<Note>)
         val view = LayoutInflater
                 .from(parent?.context)
                 .inflate(R.layout.note_item, parent, false)
-//        val lp = RecyclerView.LayoutParams(
-//                ViewGroup.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.WRAP_CONTENT)
-//        view.layoutParams = lp
         return ViewHolder(view)
     }
 
@@ -32,12 +28,12 @@ class RecyclerViewAdapter(private val itemsContainer: ItemsContainer<Note>)
     }
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        val dateFormat = SimpleDateFormat("HH:mm dd.MM.yyyy", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("HH:mm dd MMM yy", Locale.getDefault())
         val item = itemsContainer.getItems()[position]
         holder?.title?.text = item.title
         holder?.description?.text = item.description
         holder?.color?.setBackgroundColor(item.color)
-        holder?.date?.text = dateFormat.format(item.datetime)
+        holder?.date?.text = dateFormat.format(item.timeView)
 
         holder?.onClickHandle = {
             itemsContainer.editItem(item)
