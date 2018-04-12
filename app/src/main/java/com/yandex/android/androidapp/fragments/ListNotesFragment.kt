@@ -44,13 +44,18 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(tag, "onCreate()")
+        Log.d(_tag, "onCreate()")
+
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+
+        Log.d(_tag, "onCreateView()")
         containerUi?.setActivityTitle(R.string.list_title)
 
-        notesContainer = containerUi?.getNotesContainer()
+        if (notesContainer == null) {
+            notesContainer = containerUi?.getNotesContainer()
+        }
 
         val rootView = inflater?.inflate(R.layout.fragment_list_notes, container, false)!!
         _actionButton = rootView.findViewById(R.id.FAB1)
@@ -74,6 +79,9 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("onActivityResultTesting", resultCode.toString())
+        if (notesContainer == null) {
+            notesContainer = containerUi?.getNotesContainer()
+        }
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
             val note = data.getSerializableExtra(EXTRA_NOTE) as Note
@@ -124,12 +132,12 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     private fun updateNoteItem(editedNote: Note) {
-        if (notesContainer != null) {
-            notesContainer?.updateNote(editedNote)
-            val notes = getItems()
-            val index = notes.indexOfFirst { note -> note.id == editedNote.id }
-            _recyclerView?.adapter?.notifyItemChanged(index)
-        }
+        Log.d(_tag, "UpdateNoteItem")
+
+        notesContainer?.updateNote(editedNote)
+        val notes = getItems()
+        val index = notes.indexOfFirst { note -> note.id == editedNote.id }
+        _recyclerView?.adapter?.notifyItemChanged(index)
     }
 
     // endregion
