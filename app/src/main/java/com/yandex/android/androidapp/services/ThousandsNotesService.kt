@@ -50,7 +50,7 @@ class ThousandsNotesService : IntentService("ThousandsNotes") {
         }
 
         mNotifyBuilder?.setContentText("Download complete")
-                ?.setProgress(0,0,false);
+                ?.setProgress(0,0,false)
         mNotifyManager?.notify(id, mNotifyBuilder?.build())
 
 

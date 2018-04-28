@@ -13,32 +13,42 @@ data class Note(val id: String, var title: String, var description: String = "",
 
     companion object {
         @JvmStatic
-        fun formatDate(date : Date) : String {
-            val dateFormatString = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-            val dateFormat = SimpleDateFormat(dateFormatString, Locale.getDefault())
+        fun formatDate(date : Date?) : String? {
+            if (date != null) {
+                val dateFormatString = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+                val dateFormat = SimpleDateFormat(dateFormatString, Locale.getDefault())
 
-            return dateFormat.format(date)
+                return dateFormat.format(date)
+            }
+            return null
         }
 
         @JvmStatic
-        fun parseDate(string: String) : Date {
-            val dateFormatString = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-            val dateFormat = SimpleDateFormat(dateFormatString, Locale.getDefault())
+        fun parseDate(string: String?) : Date? {
+            if (string != null) {
+                val dateFormatString = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+                val dateFormat = SimpleDateFormat(dateFormatString, Locale.getDefault())
+                return dateFormat.parse(string)
+            }
 
-            return dateFormat.parse(string)
+            return null
         }
 
-        fun getNoteFromJson(id: String, json : String ) : Note {
-            val jsonObj = JSONObject(json)
+        fun getNoteFromJson(id: String, json : String ) : Note? {
+            return try {
+                val jsonObj = JSONObject(json)
 
-            val title = jsonObj.getString("title")
-            val description = jsonObj.getString("description")
-            val color = Color.parseColor(jsonObj.getString("color"))
-            val timeCreate = parseDate(jsonObj.getString("created"))
-            val timeEdit = parseDate(jsonObj.getString("edited"))
-            val timeView = parseDate(jsonObj.getString("viewed"))
+                val title = jsonObj.getString("title")
+                val description = jsonObj.getString("description")
+                val color = Color.parseColor(jsonObj.getString("color"))
+                val timeCreate = parseDate(jsonObj.getString("created"))!!
+                val timeEdit = parseDate(jsonObj.getString("edited"))!!
+                val timeView = parseDate(jsonObj.getString("viewed"))!!
 
-            return Note(id, title, description, color, timeCreate, timeEdit, timeView)
+                Note(id, title, description, color, timeCreate, timeEdit, timeView)
+            } catch (ex : NullPointerException) {
+                null
+            }
         }
     }
 
@@ -47,9 +57,9 @@ data class Note(val id: String, var title: String, var description: String = "",
         jsonMap["title"] = title
         jsonMap["description"] = description
         jsonMap["color"] = getHEXColor()
-        jsonMap["created"] = formatDate(timeCreate)
-        jsonMap["edited"] = formatDate(timeEdit)
-        jsonMap["viewed"] = formatDate(timeView)
+        jsonMap["created"] = formatDate(timeCreate) ?: ""
+        jsonMap["edited"] = formatDate(timeEdit) ?: ""
+        jsonMap["viewed"] = formatDate(timeView) ?: ""
 
         return JSONObject(jsonMap).toString()
     }

@@ -35,8 +35,6 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     private var containerUi : ContainerUI? = null
     private var updateBroadcastReceiver : UpdateBroadcastReceiver? = null
 
-    private var notesContainer : NotesContainerUI? = null
-
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context is ContainerUI)
@@ -55,10 +53,6 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
         Log.d(_tag, "onCreateView()")
         containerUi?.setActivityTitle(R.string.list_title)
-
-        if (notesContainer == null) {
-            notesContainer = containerUi?.getNotesContainer()
-        }
 
         val rootView = inflater?.inflate(R.layout.fragment_list_notes, container, false)!!
         _actionButton = rootView.findViewById(R.id.FAB1)
@@ -83,9 +77,6 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("onActivityResultTesting", resultCode.toString())
-        if (notesContainer == null) {
-            notesContainer = containerUi?.getNotesContainer()
-        }
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
             val note = data.getSerializableExtra(EXTRA_NOTE) as Note
@@ -99,6 +90,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     override fun getItems(): Array<Note> {
+        val notesContainer = containerUi?.getNotesContainer()
         return notesContainer?.getNotes() ?: arrayOf()
     }
 
@@ -116,10 +108,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
 
     private fun addNoteItem(note: Note) {
-        if (notesContainer != null) {
-            notesContainer?.addNote(note)
-            _recyclerView?.adapter?.notifyItemInserted(getItems().size - 1)
-        }
+        val notesContainer = containerUi?.getNotesContainer()
+        notesContainer?.addNoteAsync(note)
     }
 
     // endregion
@@ -137,11 +127,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     private fun updateNoteItem(editedNote: Note) {
         Log.d(_tag, "UpdateNoteItem")
-
-        notesContainer?.updateNote(editedNote)
-        val notes = getItems()
-        val index = notes.indexOfFirst { note -> note.id == editedNote.id }
-        _recyclerView?.adapter?.notifyItemChanged(index)
+        val notesContainer = containerUi?.getNotesContainer()
+        notesContainer?.updateNoteAsync(editedNote)
     }
 
     // endregion
@@ -162,10 +149,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     private fun deleteNote(position: Int) {
         val note = getItems()[position]
-        if (notesContainer != null) {
-            notesContainer?.deleteNote(note)
-            _recyclerView?.adapter?.notifyDataSetChanged()
-        }
+        val notesContainer = containerUi?.getNotesContainer()
+        notesContainer?.deleteNoteAsync(note)
     }
 
     override fun deleteItem(position: Int) : Boolean {
@@ -189,14 +174,17 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         context.registerReceiver(updateBroadcastReceiver, newIntentFilter)
     }
 
+    fun updateListNotes() {
+        _recyclerView?.adapter?.notifyDataSetChanged()
+    }
+
     inner class UpdateBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(tag, "onReceive()")
             val result = intent?.getBooleanExtra(EXTRA_THOUSANDS_NOTES, true)
-            notesContainer?.refreshData()
-            _recyclerView?.adapter?.notifyDataSetChanged()
+            val notesContainer = containerUi?.getNotesContainer()
+            notesContainer?.refreshDataAsync()
         }
-
     }
 
 }

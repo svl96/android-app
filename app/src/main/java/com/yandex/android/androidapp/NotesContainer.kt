@@ -1,10 +1,34 @@
 package com.yandex.android.androidapp
 
 import android.content.Context
+import com.yandex.android.androidapp.fragments.DatabaseFragment
 import java.util.*
+import kotlin.collections.HashMap
 
 
-class NotesContainer(private val databaseHelper: NotesDatabaseHelper) : NotesContainerUI{
+class NotesContainer(private val databaseHelper: NotesDatabaseHelper,
+                     private val databaseFragment: DatabaseFragment) : NotesContainerUI, AsyncNotesContainerUI {
+    override fun deleteNoteAsync(note: Note) {
+        databaseFragment.deleteDataAsync(databaseHelper, note)
+    }
+
+    override fun updateNoteAsync(note: Note) {
+        databaseFragment.updateDataAsync(databaseHelper, note)
+    }
+
+    override fun addNoteAsync(note: Note) {
+        addNotesAsync(arrayOf(note))
+    }
+
+    override fun addNotesAsync(notes: Array<Note>) {
+        databaseFragment.addDataAsync(databaseHelper, notes)
+    }
+
+    override fun refreshDataAsync() {
+        val params = getParams()
+        databaseFragment.getDataAsync(databaseHelper, params)
+    }
+
     private var _notes : Array<Note> = arrayOf()
 
     private var startDate : Calendar? = null
@@ -13,6 +37,9 @@ class NotesContainer(private val databaseHelper: NotesDatabaseHelper) : NotesCon
     private var sortBy : String = NotesDatabaseHelper.DEFAULT_SORT_COLUMN
     private var sortOrder : String = NotesDatabaseHelper.DEFAULT_SORT_ORDER
 
+    fun setNotes(notes: Array<Note>) {
+        _notes = notes
+    }
 
     override fun getAllNotes() : Array<Note> {
         return databaseHelper.getAllNotes()
@@ -46,15 +73,23 @@ class NotesContainer(private val databaseHelper: NotesDatabaseHelper) : NotesCon
         refreshData()
     }
 
+    private fun getParams() : Map<String, String> {
+        val params : HashMap<String, String> = HashMap()
+        params[NotesDatabaseHelper.SORT_ORDER_PARAM_KEY] = sortOrder
+        params[NotesDatabaseHelper.FILTER_COLUMN_PARAM_KEY] = filterBy
+        params[NotesDatabaseHelper.SORT_COLUMN_PARAM_KEY] = sortBy
+        if (startDate != null)
+            params[NotesDatabaseHelper.START_DATE_PARAM_KEY] = Note.formatDate(startDate?.time)!!
 
+        if (endDate != null)
+            params[NotesDatabaseHelper.END_DATE_PARM_KEY] = Note.formatDate(endDate?.time)!!
+
+        return params
+    }
 
     override fun refreshData() {
-        _notes = databaseHelper.
-                getFilterByDateNotes(
-                        date = startDate,
-                        sortColumn = sortBy,
-                        filterColumn = filterBy,
-                        sortOrder = sortOrder)
+        val params = getParams()
+        _notes = databaseHelper.getFilteredNotes(params)
     }
 
     fun setSelectParams(startDate: Calendar?, endDate: Calendar?,

@@ -50,20 +50,25 @@ class DatabaseFragment : Fragment() {
         }
     }
 
-    fun test_function() : String {
-        return "Test"
+    fun deleteDataAsync(db: NotesDatabaseHelper, note: Note) {
+        val task = DeleteDataTask(db)
+        task.execute(note)
     }
 
-    fun getAllData(db: NotesDatabaseHelper) {
-        val task = GetAllDataTask(db)
+    fun updateDataAsync(dbHelper: NotesDatabaseHelper, note: Note) {
+        val task = UpdateDataTask(dbHelper)
+        task.execute(note)
+    }
+
+    fun addDataAsync(dbHelper: NotesDatabaseHelper, notes: Array<Note>) {
+        val task = InsertDataTask(dbHelper)
+        task.execute(*notes)
+    }
+
+    fun getDataAsync(dbHelper: NotesDatabaseHelper, params : Map<String, String>) {
+        val task = GetDataTask(dbHelper, params)
         task.execute()
     }
-
-    fun updateAsync(db: NotesDatabaseHelper, note: Note) {
-//        val task = UpdateDataTask()
-//        task.execute(note)
-    }
-
 
     @SuppressLint("StaticFieldLeak")
     private inner class UpdateDataTask(val dbHelper: NotesDatabaseHelper)
@@ -71,44 +76,75 @@ class DatabaseFragment : Fragment() {
 
         override fun doInBackground(vararg notes: Note?): Boolean {
             val note = notes[0]
-            if (note != null)
-                dbHelper.updateNote(note)
-
+            if (note != null) {
+                val result = dbHelper.updateNote(note)
+                return result != 0
+            }
             return false
+        }
+
+        override fun onPostExecute(result: Boolean?) {
+            super.onPostExecute(result)
+            if (result == true)
+                containerUi?.updateData()
         }
     }
 
     @SuppressLint("StaticFieldLeak")
-    private inner class GetAllDataTask(val dbHelper: NotesDatabaseHelper)
+    private inner class InsertDataTask(val dbHelper: NotesDatabaseHelper)
+        : AsyncTask<Note, Void, Boolean>() {
+
+        override fun doInBackground(vararg notes: Note?): Boolean {
+            val insertNotes = notes.filterNotNull()
+            if (insertNotes.count() > 0) {
+                dbHelper.addNotes(insertNotes)
+                return true
+            }
+            return false
+        }
+
+        override fun onPostExecute(result: Boolean?) {
+            super.onPostExecute(result)
+            if (result == true)
+                containerUi?.updateData()
+        }
+
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private inner class DeleteDataTask(val dbHelper: NotesDatabaseHelper)
+        : AsyncTask<Note, Void, Boolean>() {
+        override fun doInBackground(vararg notes: Note?): Boolean {
+            val note = notes[0]
+            if (note != null) {
+                val result = dbHelper.deleteNote(note)
+                return result != 0
+            }
+            return false
+        }
+
+        override fun onPostExecute(result: Boolean?) {
+            super.onPostExecute(result)
+            if (result == true) {
+                containerUi?.updateData()
+            }
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private inner class GetDataTask(val dbHelper: NotesDatabaseHelper,
+                                        val params: Map<String, String>)
         : AsyncTask<Void, Void, Array<Note>>() {
 
         override fun doInBackground(vararg p0: Void?): Array<Note> {
-            return dbHelper.getAllNotes()
+            return dbHelper.getFilteredNotes(params)
         }
 
         override fun onPostExecute(result: Array<Note>?) {
             super.onPostExecute(result)
-//            mCallback(result)
+            if (result != null)
+                containerUi?.updateDataCallback(result)
         }
     }
-
-    @SuppressLint("StaticFieldLeak")
-    private inner class InsertDataTask : AsyncTask<String, Void, Boolean>() {
-
-        override fun doInBackground(vararg p0: String?): Boolean {
-            return true
-        }
-
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private inner class DeleteDataTask : AsyncTask<Void, Void, Boolean>() {
-        override fun doInBackground(vararg p0: Void?): Boolean {
-            return true
-
-        }
-    }
-
-
 
 }

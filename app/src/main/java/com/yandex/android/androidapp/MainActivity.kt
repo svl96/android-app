@@ -35,6 +35,7 @@ const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
 const val GET_COLOR_REQUEST : Int = 3
 const val DATABASE_FRAGMENT_TAG : String = "Database_fragment_tag"
+const val LISTNOTES_FRAGMENT_TAG : String = "ListNotes_fragment_tag"
 const val ACTION_UPDATE : String = "ACTION_UPDATE"
 const val EXTRA_THOUSANDS_NOTES = "EXTRA_THOUSANDS_NOTES"
 
@@ -61,33 +62,26 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         setContentView(R.layout.activity_main)
         Log.d("MainTesting", "onCreate()")
 
-        sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
-
-        databaseHelper = NotesDatabaseHelper(this)
-        notesContainer = NotesContainer(databaseHelper!!)
-
-        updateData()
-
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+        databaseHelper = NotesDatabaseHelper(this)
         navigationView = findViewById(R.id.nav_view)
 
-        databaseFragment = supportFragmentManager.findFragmentByTag(DATABASE_FRAGMENT_TAG)
-                as DatabaseFragment?
+        setupDatabaseFragment()
 
-        if (databaseFragment == null) {
-            databaseFragment = DatabaseFragment.newInstance("type")
-
-        }
+        notesContainer = NotesContainer(databaseHelper!!, databaseFragment!!)
+        updateData()
 
         if (savedInstanceState == null) {
             val fragment = ListNotesFragment.newInstance()
             supportFragmentManager
                     .beginTransaction()
-                    .add(R.id.fragment_container, fragment, "ListNotesFragment")
+                    .add(R.id.fragment_container, fragment, LISTNOTES_FRAGMENT_TAG)
                     .commit()
         }
+
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             drawerLayout = findViewById(R.id.drawer_layout)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -100,7 +94,19 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
     // endregion
 
 
+    private fun setupDatabaseFragment() {
+        databaseFragment = supportFragmentManager.findFragmentByTag(DATABASE_FRAGMENT_TAG)
+                as DatabaseFragment?
 
+        if (databaseFragment == null) {
+            databaseFragment = DatabaseFragment.newInstance("type")
+
+            supportFragmentManager
+                    .beginTransaction()
+                    .add(databaseFragment, DATABASE_FRAGMENT_TAG)
+                    .commit()
+        }
+    }
 
     private fun verifyStoragePermissions(activity: Activity) {
         // Check if we have write permission
@@ -115,6 +121,8 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
             )
         }
     }
+
+    // region  Navigation
 
     private fun setupNavigation() {
         navigationView?.setNavigationItemSelectedListener {
@@ -181,6 +189,8 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         return true
     }
 
+    // endregion
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         closeKeyboard()
         if (item?.itemId == 16908332)
@@ -221,6 +231,20 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         }
     }
 
+    override fun updateDataCallback(items: Array<Note>) {
+        if (notesContainer == null) {
+            notesContainer = NotesContainer(databaseHelper!!, databaseFragment!!)
+        }
+        notesContainer?.setNotes(items)
+
+        val listFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (listFragment is ListNotesFragment) {
+            listFragment.updateListNotes()
+        }
+
+
+    }
+
     override fun updateData() {
         val sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
 
@@ -245,11 +269,11 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         notesContainer?.setSelectParams(filterParam, filterParam,
                 sortByColumn, filterByColumn, sortOrderParam)
 
-        notesContainer?.refreshData()
+        notesContainer?.refreshDataAsync()
 
     }
 
-    override fun getNotesContainer(): NotesContainerUI {
+    override fun getNotesContainer(): NotesContainer {
         return notesContainer!!
     }
 

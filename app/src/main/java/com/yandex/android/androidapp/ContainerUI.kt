@@ -8,6 +8,8 @@ interface ContainerUI {
 
     fun updateData()
 
-    fun getNotesContainer() : NotesContainerUI
+    fun updateDataCallback(items: Array<Note>)
+
+    fun getNotesContainer() : NotesContainer
 
 }

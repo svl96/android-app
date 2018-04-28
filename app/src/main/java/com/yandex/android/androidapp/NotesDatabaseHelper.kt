@@ -34,12 +34,20 @@ class NotesDatabaseHelper(context: Context?)
         const val COLUMN_EDIT_TIME: String = "edit_time"
         const val COLUMN_VIEW_TIME: String = "view_time"
 
+
         const val DEFAULT_SORT_COLUMN = COLUMN_EDIT_TIME
         const val DEFAULT_FILTER_COLUMN = COLUMN_EDIT_TIME
         const val DESCENT_SORT_ORDER = "DESC"
         const val ASCENT_SORT_ORDER = "ASC"
 
         const val DEFAULT_SORT_ORDER = DESCENT_SORT_ORDER
+
+        // params keys
+        const val SORT_COLUMN_PARAM_KEY = "sort_column"
+        const val FILTER_COLUMN_PARAM_KEY = "filter_column"
+        const val SORT_ORDER_PARAM_KEY = "sort_order"
+        const val START_DATE_PARAM_KEY = "start_date"
+        const val END_DATE_PARM_KEY = "end_date"
 
         // queries
         private const val SQL_CREATE_TABLE_NOTES = "CREATE TABLE $TABLE_NOTES " +
@@ -78,15 +86,15 @@ class NotesDatabaseHelper(context: Context?)
     private fun fillData(db: SQLiteDatabase?) {
         // добавление данных, возможно из assets
         addNote(db, "testid1", "Note 1", "Descr 1", "#ff0000",
-                parseDate("2017-04-24T12:00:00.000+05:00"),
-                parseDate("2017-04-24T12:20:00.000+05:00"),
-                parseDate("2017-04-24T12:20:00.000+05:00")
+                Note.parseDate("2017-04-24T12:00:00.000+05:00")!!,
+                Note.parseDate("2017-04-24T12:20:00.000+05:00")!!,
+                Note.parseDate("2017-04-24T12:20:00.000+05:00")!!
                 )
 
         addNote(db,"testid2", "Note 2", "Descr 2", "#00ff00",
-                parseDate("2017-04-26T15:00:00.000+05:00"),
-                parseDate("2017-04-26T15:20:00.000+05:00"),
-                parseDate("2017-04-26T15:20:00.000+05:00")
+                Note.parseDate("2017-04-26T15:00:00.000+05:00")!!,
+                Note.parseDate("2017-04-26T15:20:00.000+05:00")!!,
+                Note.parseDate("2017-04-26T15:20:00.000+05:00")!!
         )
     }
 
@@ -182,6 +190,19 @@ class NotesDatabaseHelper(context: Context?)
                 startDate = null, endDate = null)
     }
 
+    fun getFilteredNotes(params : Map<String, String> ) : Array<Note> {
+        val startDate = Calendar.getInstance()
+        startDate.time = Note.parseDate(params[START_DATE_PARAM_KEY])
+        val endDate = Calendar.getInstance()
+        endDate.time = Note.parseDate(params[END_DATE_PARM_KEY])
+        val sortColumn: String = params[SORT_COLUMN_PARAM_KEY] ?: DEFAULT_SORT_COLUMN
+        val filterColumn : String = params[FILTER_COLUMN_PARAM_KEY] ?: DEFAULT_FILTER_COLUMN
+        val sortOrder : String = params[SORT_ORDER_PARAM_KEY] ?: DEFAULT_SORT_ORDER
+
+        return getFilterByDateRangeNotes(startDate, endDate, sortColumn, filterColumn, sortOrder)
+
+    }
+
     fun getFilterByDateNotes( date : Calendar? = null,
                               sortColumn : String = DEFAULT_SORT_COLUMN,
                               filterColumn : String = DEFAULT_FILTER_COLUMN,
@@ -252,22 +273,10 @@ class NotesDatabaseHelper(context: Context?)
         val outStartDate = truncateDateByDay(startDate)
         val outEndDate = truncateDateByDay(endDate)
 
-        val oldtimezone = outStartDate.timeZone
-
         val timeZone = Calendar.getInstance().timeZone
         outStartDate.timeZone = timeZone
         outEndDate.timeZone = timeZone
         outEndDate.add(Calendar.DAY_OF_MONTH, 1)
-
-        val startYear = outStartDate[Calendar.YEAR]
-        val startMonth = outStartDate[Calendar.MONTH]
-        val startDay = outStartDate[Calendar.DAY_OF_MONTH]
-
-        val EndYear = outEndDate[Calendar.YEAR]
-        val EndMonth = outEndDate[Calendar.MONTH]
-        val endDay = outEndDate[Calendar.DAY_OF_MONTH]
-
-
 
         val startTime = outStartDate.time.time.toString()
         val endTime = outEndDate.time.time.toString()
@@ -296,11 +305,6 @@ class NotesDatabaseHelper(context: Context?)
         val blue = color and 0xff
         val hexColor = "#%02x%02x%02x".format(red, green, blue)
         return hexColor
-    }
-
-    private fun parseDate(string: String) : Date {
-        val dateFormat = SimpleDateFormat(dateFormatString, Locale.getDefault())
-        return dateFormat.parse(string)
     }
 
     // endregion
