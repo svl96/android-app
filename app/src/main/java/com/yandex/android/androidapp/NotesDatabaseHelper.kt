@@ -191,10 +191,18 @@ class NotesDatabaseHelper(context: Context?)
     }
 
     fun getFilteredNotes(params : Map<String, String> ) : Array<Note> {
-        val startDate = Calendar.getInstance()
-        startDate.time = Note.parseDate(params[START_DATE_PARAM_KEY])
-        val endDate = Calendar.getInstance()
-        endDate.time = Note.parseDate(params[END_DATE_PARM_KEY])
+        var startDate: Calendar? = null
+        if (params.contains(START_DATE_PARAM_KEY)) {
+            startDate = Calendar.getInstance()
+            startDate.time = Note.parseDate(params[START_DATE_PARAM_KEY])
+        }
+
+        var endDate : Calendar? = null
+        if (params.contains(END_DATE_PARM_KEY)) {
+            endDate = Calendar.getInstance()
+            endDate.time = Note.parseDate(params[END_DATE_PARM_KEY])
+        }
+
         val sortColumn: String = params[SORT_COLUMN_PARAM_KEY] ?: DEFAULT_SORT_COLUMN
         val filterColumn : String = params[FILTER_COLUMN_PARAM_KEY] ?: DEFAULT_FILTER_COLUMN
         val sortOrder : String = params[SORT_ORDER_PARAM_KEY] ?: DEFAULT_SORT_ORDER

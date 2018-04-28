@@ -7,9 +7,7 @@ import android.content.Intent
 import android.os.Environment
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import com.yandex.android.androidapp.Note
-import com.yandex.android.androidapp.NotesDatabaseHelper
-import com.yandex.android.androidapp.R
+import com.yandex.android.androidapp.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -22,6 +20,8 @@ class ImportExportService : IntentService("ImportExportNotes") {
         const val EXTRA_IMPORT_EXPORT_MODE = "extra_mode"
         const val IMPORT_MODE = "import_mode"
         const val EXPORT_MODE = "export_mode"
+        const val ACTION_EXPORT = "ACTION_EXPORT"
+        const val ACTION_IMPORT = "ACTION_IMPORT"
     }
 
     private var databaseHelper : NotesDatabaseHelper? = null
@@ -66,6 +66,16 @@ class ImportExportService : IntentService("ImportExportNotes") {
         Thread.sleep(2000)
         val notes = parseJson(json)
         writeInDatabase(notes)
+
+        sendImportResponse()
+    }
+
+    private fun sendImportResponse() {
+        val responseIntent = Intent()
+
+        responseIntent.action = ACTION_UPDATE
+        responseIntent.addCategory(Intent.CATEGORY_DEFAULT)
+        sendBroadcast(responseIntent)
     }
 
     private fun writeInDatabase(notes : List<Note>?) {
@@ -108,7 +118,7 @@ class ImportExportService : IntentService("ImportExportNotes") {
     }
 
     private fun readFromDatabase() : Array<Note> {
-        return arrayOf()
+        return databaseHelper?.getAllNotes() ?: arrayOf()
     }
 
     private fun writeInFile(filename: String, text: String) {
@@ -122,6 +132,15 @@ class ImportExportService : IntentService("ImportExportNotes") {
             file.createNewFile()
 
         file.writeText(text)
+    }
+
+    private fun sendExportResponse(){
+        val responseIntent = Intent()
+
+        responseIntent.action = ACTION_EXPORT
+        responseIntent.addCategory(Intent.CATEGORY_DEFAULT)
+        responseIntent.putExtra(EXTRA_THOUSANDS_NOTES, true)
+        sendBroadcast(responseIntent)
     }
 
     // endregion

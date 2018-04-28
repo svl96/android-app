@@ -1,6 +1,7 @@
 package com.yandex.android.androidapp.fragments
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
 import android.support.v4.app.Fragment
@@ -13,6 +14,7 @@ import com.yandex.android.androidapp.ContainerUI
 import com.yandex.android.androidapp.Note
 import com.yandex.android.androidapp.NotesContainerUI
 import com.yandex.android.androidapp.R
+import com.yandex.android.androidapp.services.ImportExportService
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -62,10 +64,19 @@ class ImportExportFragmet : Fragment() {
     }
 
     private fun exportNotes() {
+        val intentService = Intent(context, ImportExportService::class.java)
+        intentService.putExtra(ImportExportService.EXTRA_IMPORT_EXPORT_MODE,
+                ImportExportService.EXPORT_MODE)
+
+        context.startService(intentService)
     }
 
     private fun importNotes() {
+        val intentService = Intent(context, ImportExportService::class.java)
+        intentService.putExtra(ImportExportService.EXTRA_IMPORT_EXPORT_MODE,
+                ImportExportService.IMPORT_MODE)
 
+        context.startService(intentService)
     }
 
 
