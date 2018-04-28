@@ -1,13 +1,16 @@
 package com.yandex.android.androidapp.fragments
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import com.yandex.android.androidapp.ContainerUI
 import com.yandex.android.androidapp.R
+import com.yandex.android.androidapp.services.ThousandsNotesService
 
 
 class AboutAppFragment : Fragment() {
@@ -32,6 +35,17 @@ class AboutAppFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         containerUi?.setActivityTitle(R.string.about_app_title)
-        return inflater?.inflate(R.layout.fragment_about_app, container, false)!!
+        val rootView = inflater?.inflate(R.layout.fragment_about_app, container, false)!!
+
+        val add1000NotesBtn = rootView.findViewById<Button>(R.id.add_1000_notes)
+
+        add1000NotesBtn.setOnClickListener { addNotes() }
+
+        return rootView
+    }
+
+    private fun addNotes() {
+        val newIntentService = Intent(context, ThousandsNotesService::class.java)
+        context.startService(newIntentService)
     }
 }

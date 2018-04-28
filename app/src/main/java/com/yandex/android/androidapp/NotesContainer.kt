@@ -15,7 +15,7 @@ class NotesContainer(private val databaseHelper: NotesDatabaseHelper) : NotesCon
 
 
     override fun getAllNotes() : Array<Note> {
-        return databaseHelper?.getAllNotes() ?: arrayOf()
+        return databaseHelper.getAllNotes()
     }
 
     override fun getNotes(): Array<Note> {
@@ -23,7 +23,7 @@ class NotesContainer(private val databaseHelper: NotesDatabaseHelper) : NotesCon
     }
 
     override fun deleteNote(note: Note): Boolean {
-        val deleteRes = databaseHelper?.deleteNote(note)
+        val deleteRes = databaseHelper.deleteNote(note)
         refreshData()
 
         return deleteRes != 0
@@ -37,14 +37,16 @@ class NotesContainer(private val databaseHelper: NotesDatabaseHelper) : NotesCon
     }
 
     override fun addNotes(notes: Array<Note>) {
-        databaseHelper?.importNotes(notes.asList())
+        databaseHelper.importNotes(notes.asList())
         refreshData()
     }
 
     override fun addNote(note: Note) {
-        databaseHelper?.addNotes(listOf(note))
+        databaseHelper.addNotes(listOf(note))
         refreshData()
     }
+
+
 
     override fun refreshData() {
         _notes = databaseHelper.

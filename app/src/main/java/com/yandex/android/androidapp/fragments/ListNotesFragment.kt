@@ -2,8 +2,10 @@ package com.yandex.android.androidapp.fragments
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
@@ -31,6 +33,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     private var _recyclerView: RecyclerView? = null
     private var _actionButton: FloatingActionButton? = null
     private var containerUi : ContainerUI? = null
+    private var updateBroadcastReceiver : UpdateBroadcastReceiver? = null
 
     private var notesContainer : NotesContainerUI? = null
 
@@ -63,6 +66,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         _actionButton?.setOnClickListener { createItem() }
 
         setupRecyclerView()
+        setupBroadcastReceiver()
 
         return rootView
     }
@@ -171,5 +175,28 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     // endregion
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        context.unregisterReceiver(updateBroadcastReceiver)
+    }
+
+    private fun setupBroadcastReceiver() {
+        updateBroadcastReceiver = UpdateBroadcastReceiver()
+
+        val newIntentFilter = IntentFilter(ACTION_UPDATE)
+        newIntentFilter.addCategory(Intent.CATEGORY_DEFAULT)
+        context.registerReceiver(updateBroadcastReceiver, newIntentFilter)
+    }
+
+    inner class UpdateBroadcastReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(tag, "onReceive()")
+            val result = intent?.getBooleanExtra(EXTRA_THOUSANDS_NOTES, true)
+            notesContainer?.refreshData()
+            _recyclerView?.adapter?.notifyDataSetChanged()
+        }
+
+    }
 
 }

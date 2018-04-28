@@ -2,8 +2,7 @@ package com.yandex.android.androidapp
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
-import android.content.SharedPreferences
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -35,6 +34,9 @@ const val DEFAULT_COLOR : Int = Color.RED
 const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
 const val GET_COLOR_REQUEST : Int = 3
+const val DATABASE_FRAGMENT_TAG : String = "Database_fragment_tag"
+const val ACTION_UPDATE : String = "ACTION_UPDATE"
+const val EXTRA_THOUSANDS_NOTES = "EXTRA_THOUSANDS_NOTES"
 
 private val REQUEST_EXTERNAL_STORAGE = 1
 private val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -49,6 +51,8 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
     private var notesContainer: NotesContainer? = null
     private var databaseHelper : NotesDatabaseHelper? = null
     private var sharedPreferences : SharedPreferences? = null
+    private var databaseFragment : DatabaseFragment? = null
+
 
     // region Setup Activity
 
@@ -69,6 +73,14 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
 
         navigationView = findViewById(R.id.nav_view)
 
+        databaseFragment = supportFragmentManager.findFragmentByTag(DATABASE_FRAGMENT_TAG)
+                as DatabaseFragment?
+
+        if (databaseFragment == null) {
+            databaseFragment = DatabaseFragment.newInstance("type")
+
+        }
+
         if (savedInstanceState == null) {
             val fragment = ListNotesFragment.newInstance()
             supportFragmentManager
@@ -82,8 +94,13 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
             supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_menu)
         }
         setupNavigation()
+
+
     }
     // endregion
+
+
+
 
     private fun verifyStoragePermissions(activity: Activity) {
         // Check if we have write permission
@@ -235,5 +252,6 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
     override fun getNotesContainer(): NotesContainerUI {
         return notesContainer!!
     }
+
 
 }
