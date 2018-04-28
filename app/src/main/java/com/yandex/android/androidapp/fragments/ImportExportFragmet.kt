@@ -62,103 +62,11 @@ class ImportExportFragmet : Fragment() {
     }
 
     private fun exportNotes() {
-        if (notesContainer != null) {
-            val notes = notesContainer?.getAllNotes()
-            val json = createJson(notes!!)
-            writeInFile(defaultFilename, json)
-        } else {
-            Log.e(tag, "Notes Container is null")
-        }
     }
 
     private fun importNotes() {
 
-        val json = readFromFile(defaultFilename)
-        if (json == "")
-            return
-        if (notesContainer != null) {
-            val notes = parseJson(json)
-            notesContainer?.addNotes(notes)
-        } else {
-            Log.e(tag, "Notes Container is null")
-        }
-    }
-
-    private fun writeInFile(filename: String, text: String) {
-        if (!isExternalStorageWritable()) {
-            return
-        }
-        val dir = Environment.getExternalStorageDirectory()
-        Log.d(_tag, dir.absolutePath)
-        val file = File(dir, filename)
-        if (!file.exists())
-            file.createNewFile()
-
-        file.writeText(text)
-    }
-
-    private fun readFromFile(filename: String) : String {
-        if (!isExternalStorageReadable()) {
-            return ""
-        }
-        val dir = Environment.getExternalStorageDirectory()
-        Log.d(_tag, dir.absolutePath)
-        val file = File(dir, filename)
-        if (!file.exists()) {
-            Log.d(_tag, "Empty")
-            return ""
-        }
-
-        val text = file.readText()
-        Log.d(_tag, text)
-
-        return text
-    }
-
-    private fun createJson(notes: Array<Note>) : String {
-        val jsonArray = JSONArray()
-
-        for (note in notes) {
-            jsonArray.put(JSONObject(note.getJson()))
-        }
-
-        return jsonArray.toString(2)
-    }
-
-    private fun parseJson(json : String) : Array<Note> {
-        var notes = arrayOf<Note>()
-
-        try {
-            val listNotes = mutableListOf<Note>()
-            val jsonArray = JSONArray(json)
-
-            val size = jsonArray.length()
-            for (i in 0..(size - 1)) {
-                val jsonObject = jsonArray.getJSONObject(i)
-                val uniqueId = UUID.randomUUID().toString()
-                val note = Note.getNoteFromJson(uniqueId, jsonObject.toString())
-
-                listNotes.add(note)
-            }
-
-            notes = listNotes.toTypedArray()
-        } catch (ex : JSONException) {
-            Log.d(_tag, "JSON EXCEPTION")
-        }
-        return notes
     }
 
 
-    /* Checks if external storage is available for read and write */
-    private fun isExternalStorageWritable(): Boolean {
-        val state = Environment.getExternalStorageState()
-        return Environment.MEDIA_MOUNTED.equals(state)
-    }
-
-    /* Checks if external storage is available to at least read */
-    private fun isExternalStorageReadable(): Boolean {
-        val state = Environment.getExternalStorageState()
-        return Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)
-    }
 }
