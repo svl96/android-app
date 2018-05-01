@@ -12,6 +12,10 @@ import java.util.*
 
 class ThousandsNotesService : IntentService("ThousandsNotes") {
 
+    companion object {
+        const val EXTRA_THOUSANDS_NOTES = "EXTRA_THOUSANDS_NOTES"
+    }
+
     var mNotifyManager: NotificationManager? = null
     var mNotifyBuilder: NotificationCompat.Builder? = null
 

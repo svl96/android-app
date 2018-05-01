@@ -19,6 +19,8 @@ import java.util.*
 class SettingsFragment : Fragment() {
 
     companion object {
+        const val FRAGMENT_TAG = "SettingsFragment"
+
         @JvmStatic
         fun newInstance() : SettingsFragment {
             return SettingsFragment()
@@ -32,6 +34,7 @@ class SettingsFragment : Fragment() {
 
 
     override fun onAttach(context: Context?) {
+
         super.onAttach(context)
         if (context is ContainerUI)
             containerUi = context

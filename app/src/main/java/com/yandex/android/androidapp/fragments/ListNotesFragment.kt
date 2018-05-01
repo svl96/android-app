@@ -22,6 +22,9 @@ import com.yandex.android.androidapp.adapters.RecyclerViewAdapter
 class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     companion object {
+
+        const val FRAGMENT_TAG : String = "ListNotesFragment"
+
         @JvmStatic
         fun newInstance() : ListNotesFragment {
             return ListNotesFragment()
@@ -36,6 +39,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     private var updateBroadcastReceiver : UpdateBroadcastReceiver? = null
     private var position = 0
     private val offset = 20
+
+    // region On Create
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -62,7 +67,6 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         _actionButton?.setOnClickListener { createItem() }
 
         position = savedInstanceState?.getInt("position") ?: 0
-        Log.d(tag, "Save Position $position")
         setupRecyclerView()
         setupBroadcastReceiver()
 
@@ -77,6 +81,22 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         outState?.putInt("position", position)
 
         super.onSaveInstanceState(outState)
+    }
+
+    // endregion
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d("onActivityResultTesting", resultCode.toString())
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            val note = data.getSerializableExtra(EditFragment.EXTRA_NOTE) as Note
+            Log.d("onActivityResultTesting", note.toString())
+            if (requestCode == GET_NOTE_REQUEST) {
+                addNoteItem(note)
+            } else if (requestCode == EDIT_NOTE_REQUEST) {
+                updateNoteItem(note)
+            }
+        }
     }
 
     private fun setupRecyclerView() {
@@ -100,20 +120,6 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         position = currentPosition
         val notesContainer = containerUi?.getNotesContainer()
         notesContainer?.loadNextPageAsync(limit)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d("onActivityResultTesting", resultCode.toString())
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && data != null) {
-            val note = data.getSerializableExtra(EXTRA_NOTE) as Note
-            Log.d("onActivityResultTesting", note.toString())
-            if (requestCode == GET_NOTE_REQUEST) {
-                addNoteItem(note)
-            } else if (requestCode == EDIT_NOTE_REQUEST) {
-                updateNoteItem(note)
-            }
-        }
     }
 
     override fun getItems(): Array<Note> {
@@ -188,21 +194,7 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     // endregion
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        context.unregisterReceiver(updateBroadcastReceiver)
-    }
-
-    private fun setupBroadcastReceiver() {
-        updateBroadcastReceiver = UpdateBroadcastReceiver()
-
-        val newIntentFilter = IntentFilter(ACTION_UPDATE)
-        newIntentFilter.addCategory(Intent.CATEGORY_DEFAULT)
-        context.registerReceiver(updateBroadcastReceiver, newIntentFilter)
-    }
-
     fun updateListNotes() {
-        Log.d(tag, "UpdateListNotes")
         _recyclerView?.adapter?.notifyDataSetChanged()
         val totalCount = _recyclerView?.layoutManager?.itemCount ?: 0
         if (totalCount < position) {
@@ -212,11 +204,28 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        context.unregisterReceiver(updateBroadcastReceiver)
+    }
+
+    // region Broadcast Receiver
+
+    private fun setupBroadcastReceiver() {
+        updateBroadcastReceiver = UpdateBroadcastReceiver()
+
+        val newIntentFilter = IntentFilter(ACTION_UPDATE)
+        newIntentFilter.addCategory(Intent.CATEGORY_DEFAULT)
+        context.registerReceiver(updateBroadcastReceiver, newIntentFilter)
+    }
+
     inner class UpdateBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val notesContainer = containerUi?.getNotesContainer()
             notesContainer?.refreshDataAsync()
         }
     }
+
+    // endregion
 
 }

@@ -12,6 +12,8 @@ data class Note(val id: String, var title: String, var description: String = "",
                 ) : Serializable {
 
     companion object {
+        const val DEFAULT_COLOR : Int = Color.RED
+
         @JvmStatic
         fun formatDate(date : Date?) : String? {
             if (date != null) {

@@ -12,8 +12,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.yandex.android.androidapp.DEFAULT_COLOR
-import com.yandex.android.androidapp.EXTRA_COLOR
+import com.yandex.android.androidapp.Note
 import com.yandex.android.androidapp.R
 
 class ColorPickerFragment : Fragment() {
@@ -23,9 +22,11 @@ class ColorPickerFragment : Fragment() {
     private var rgbTextView : TextView? = null
     private var scrollLayout : LinearLayout? = null
 
-    private var currentColorValue : Int = DEFAULT_COLOR
+    private var currentColorValue : Int = Note.DEFAULT_COLOR
 
     companion object {
+        const val EXTRA_COLOR : String = "com.yandex.android.EXTRA_COLOR"
+
         @JvmStatic
         fun newInstance(color: Int) : ColorPickerFragment {
             val args = Bundle()

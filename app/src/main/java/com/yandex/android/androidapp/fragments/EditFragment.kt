@@ -17,6 +17,8 @@ import java.util.*
 class EditFragment : Fragment() {
 
     companion object {
+        const val EXTRA_NOTE : String = "com.yandex.android.EXTRA_NOTE"
+
         @JvmStatic
         fun newInstance(note: Note?) : EditFragment {
             val args = Bundle()
@@ -32,7 +34,7 @@ class EditFragment : Fragment() {
     private var note : Note? = null
     private var editTitle : EditText? = null
     private var editDescription : EditText? = null
-    private var noteColor : Int = DEFAULT_COLOR
+    private var noteColor : Int = Note.DEFAULT_COLOR
     private var currentColor : View? = null
     private var saveNote : () -> Unit = {}
     private var containerUi : ContainerUI? = null
@@ -123,7 +125,7 @@ class EditFragment : Fragment() {
         Log.d(_tag, "onActivityResult")
         if (resultCode == Activity.RESULT_OK && requestCode == GET_COLOR_REQUEST &&
                 data != null) {
-            noteColor = data.getIntExtra(EXTRA_COLOR, DEFAULT_COLOR)
+            noteColor = data.getIntExtra(ColorPickerFragment.EXTRA_COLOR, Note.DEFAULT_COLOR)
             note?.color = noteColor
             currentColor?.setBackgroundColor(noteColor)
         }
@@ -139,7 +141,7 @@ class EditFragment : Fragment() {
         this.editTitle?.setText(note?.title, TextView.BufferType.EDITABLE)
         this.editDescription?.setText(note?.description, TextView.BufferType.EDITABLE)
 
-        noteColor = note?.color ?: DEFAULT_COLOR
+        noteColor = note?.color ?: Note.DEFAULT_COLOR
         saveNote = {updateNote()}
 
     }

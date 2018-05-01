@@ -139,7 +139,6 @@ class ImportExportService : IntentService("ImportExportNotes") {
 
         responseIntent.action = ACTION_EXPORT
         responseIntent.addCategory(Intent.CATEGORY_DEFAULT)
-        responseIntent.putExtra(EXTRA_THOUSANDS_NOTES, true)
         sendBroadcast(responseIntent)
     }
 

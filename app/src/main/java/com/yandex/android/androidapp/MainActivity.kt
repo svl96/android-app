@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -20,24 +19,17 @@ import android.view.inputmethod.InputMethodManager
 import com.yandex.android.androidapp.fragments.*
 import java.util.*
 
-
-const val EXTRA_NOTE : String = "com.yandex.android.EXTRA_NOTE"
-const val EXTRA_EDIT_MODE : String = "com.yandex.android.EXTRA_EDIT_MODE"
-const val EXTRA_COLOR : String = "com.yandex.android.EXTRA_COLOR"
 const val APP_PREFERENCES = "mysettings"
 const val SHARED_SORT_BY = "SHARED_SORT_BY"
 const val SHARED_SORT_ORDER = "SHARED_SORT_ORDER"
 const val SHARED_FILTER_BY = "SHARED_FILTER_BY"
 const val SHARED_FILTER_DATE = "SHARED_FILTER_DATE"
 const val SHARED_FILTER_ENABLE = "SHARED_FILTER_ENABLE"
-const val DEFAULT_COLOR : Int = Color.RED
 const val GET_NOTE_REQUEST : Int = 1
 const val EDIT_NOTE_REQUEST : Int = 2
 const val GET_COLOR_REQUEST : Int = 3
-const val DATABASE_FRAGMENT_TAG : String = "Database_fragment_tag"
-const val LISTNOTES_FRAGMENT_TAG : String = "ListNotes_fragment_tag"
+
 const val ACTION_UPDATE : String = "ACTION_UPDATE"
-const val EXTRA_THOUSANDS_NOTES = "EXTRA_THOUSANDS_NOTES"
 
 private val REQUEST_EXTERNAL_STORAGE = 1
 private val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -79,7 +71,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
             val fragment = ListNotesFragment.newInstance()
             supportFragmentManager
                     .beginTransaction()
-                    .add(R.id.fragment_container, fragment, LISTNOTES_FRAGMENT_TAG)
+                    .add(R.id.fragment_container, fragment, ListNotesFragment.FRAGMENT_TAG)
                     .commit()
         }
 
@@ -96,7 +88,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
 
 
     private fun setupDatabaseFragment() {
-        databaseFragment = supportFragmentManager.findFragmentByTag(DATABASE_FRAGMENT_TAG)
+        databaseFragment = supportFragmentManager.findFragmentByTag(DatabaseFragment.FRAGMENT_TAG)
                 as DatabaseFragment?
 
         if (databaseFragment == null) {
@@ -104,22 +96,8 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
 
             supportFragmentManager
                     .beginTransaction()
-                    .add(databaseFragment, DATABASE_FRAGMENT_TAG)
+                    .add(databaseFragment, DatabaseFragment.FRAGMENT_TAG)
                     .commit()
-        }
-    }
-
-    private fun verifyStoragePermissions(activity: Activity) {
-        // Check if we have write permission
-        val permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            )
         }
     }
 
@@ -148,8 +126,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
     }
 
     private fun onHomeSelected() : Boolean {
-        val tag = "ListNotesFragment"
-        var fragment = supportFragmentManager.findFragmentByTag(tag)
+        var fragment = supportFragmentManager.findFragmentByTag(ListNotesFragment.FRAGMENT_TAG)
         if (fragment == null)
             fragment = ListNotesFragment.newInstance()
 
@@ -159,8 +136,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
 
     private fun onImportExportSelected(): Boolean {
         verifyStoragePermissions(this)
-        val tag = "ImportExportFragment"
-        var fragment = supportFragmentManager.findFragmentByTag(tag)
+        var fragment = supportFragmentManager.findFragmentByTag(ImportExportFragment.FRAGMENT_TAG)
         if (fragment == null)
             fragment = ImportExportFragment.newInstance()
 
@@ -169,8 +145,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
     }
 
     private fun onSettingsSelected() : Boolean {
-        val tag = "SettingsFragment"
-        var fragment = supportFragmentManager.findFragmentByTag(tag)
+        var fragment = supportFragmentManager.findFragmentByTag(SettingsFragment.FRAGMENT_TAG)
         if (fragment == null)
             fragment = SettingsFragment.newInstance()
 
@@ -190,6 +165,20 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
     }
 
     // endregion
+
+    private fun verifyStoragePermissions(activity: Activity) {
+        // Check if we have write permission
+        val permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            )
+        }
+    }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         closeKeyboard()
@@ -231,17 +220,8 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         }
     }
 
-    override fun updateDataCallback(items: Array<Note>) {
-        if (notesContainer == null) {
-            notesContainer = NotesContainer(databaseHelper!!, databaseFragment!!)
-        }
-        notesContainer?.setNotes(items)
-        Log.d(tag, "updateDataCallback")
-        val listFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-        if (listFragment is ListNotesFragment) {
-            listFragment.updateListNotes()
-        }
-
+    override fun getNotesContainer(): NotesContainer {
+        return notesContainer!!
     }
 
     private fun setupNewNotesContainer() {
@@ -276,9 +256,16 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         notesContainer?.refreshDataAsync()
     }
 
-    override fun getNotesContainer(): NotesContainer {
-        return notesContainer!!
+    override fun updateDataCallback(items: Array<Note>) {
+        if (notesContainer == null) {
+            notesContainer = NotesContainer(databaseHelper!!, databaseFragment!!)
+        }
+        notesContainer?.setNotes(items)
+        Log.d(tag, "updateDataCallback")
+        val listFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (listFragment is ListNotesFragment) {
+            listFragment.updateListNotes()
+        }
     }
-
 
 }

@@ -10,6 +10,8 @@ import com.yandex.android.androidapp.*
 
 class DatabaseFragment : Fragment() {
     companion object {
+        const val FRAGMENT_TAG : String = "Database_fragment_tag"
+
         @JvmStatic
         fun newInstance(request_type : String) : DatabaseFragment {
             val args = Bundle()

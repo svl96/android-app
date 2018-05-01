@@ -4,13 +4,13 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.AbsListView
 
-abstract class RecyclerScrollListener(val manager: LinearLayoutManager, var currentPosition: Int)
+abstract class RecyclerScrollListener(private val manager: LinearLayoutManager, var currentPosition: Int)
     : RecyclerView.OnScrollListener() {
 
-    var isScrolling = false
-    var totalItemCount = 0
-    val startPosition = 0
-    var loading = true
+    private var isScrolling = false
+    private var totalItemCount = 0
+    private val startPosition = 0
+    private var loading = true
 
     override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
         super.onScrollStateChanged(recyclerView, newState)

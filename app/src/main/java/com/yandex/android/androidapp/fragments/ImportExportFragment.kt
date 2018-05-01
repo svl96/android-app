@@ -16,6 +16,9 @@ import com.yandex.android.androidapp.services.ImportExportService
 
 class ImportExportFragment : Fragment() {
     companion object {
+
+        const val FRAGMENT_TAG = "ImportExportFragment"
+
         @JvmStatic
         fun newInstance() : ImportExportFragment {
             return ImportExportFragment()
