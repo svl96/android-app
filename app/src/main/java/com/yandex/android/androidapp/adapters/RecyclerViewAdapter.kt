@@ -69,7 +69,6 @@ class RecyclerViewAdapter(private val itemsContainer: ItemsContainer<Note>)
         override fun onClick(p0: View?) {
             onClickHandle()
         }
-
     }
 
 }

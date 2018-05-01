@@ -3,35 +3,24 @@ package com.yandex.android.androidapp.fragments
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import com.yandex.android.androidapp.ContainerUI
-import com.yandex.android.androidapp.Note
 import com.yandex.android.androidapp.NotesContainerUI
 import com.yandex.android.androidapp.R
 import com.yandex.android.androidapp.services.ImportExportService
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
-import java.io.File
-import java.util.*
 
 
-class ImportExportFragmet : Fragment() {
+class ImportExportFragment : Fragment() {
     companion object {
         @JvmStatic
-        fun newInstance() : ImportExportFragmet {
-            return ImportExportFragmet()
+        fun newInstance() : ImportExportFragment {
+            return ImportExportFragment()
         }
     }
-
-    private var _tag = "ImportExportFragment"
-    private val defaultFilename = "itemlist.ili"
 
     private var containerUi: ContainerUI? = null
     private var notesContainer : NotesContainerUI? = null
@@ -56,9 +45,7 @@ class ImportExportFragmet : Fragment() {
         val importButton = rootView.findViewById<Button>(R.id.import_button)
 
         importButton.setOnClickListener { importNotes() }
-
         exportButton.setOnClickListener { exportNotes() }
-
 
         return rootView
     }

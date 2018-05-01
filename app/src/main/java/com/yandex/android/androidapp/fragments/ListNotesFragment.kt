@@ -34,6 +34,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     private var _actionButton: FloatingActionButton? = null
     private var containerUi : ContainerUI? = null
     private var updateBroadcastReceiver : UpdateBroadcastReceiver? = null
+    private var position = 0
+    private val offset = 20
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -59,6 +61,8 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
         _recyclerView = rootView.findViewById(R.id.notes_list_view)
         _actionButton?.setOnClickListener { createItem() }
 
+        position = savedInstanceState?.getInt("position") ?: 0
+        Log.d(tag, "Save Position $position")
         setupRecyclerView()
         setupBroadcastReceiver()
 
@@ -67,12 +71,35 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         Log.d(tag, "onSaveInstantState()")
+
+        val manager : LinearLayoutManager = _recyclerView?.layoutManager as LinearLayoutManager
+        val position = manager.findFirstVisibleItemPosition()
+        outState?.putInt("position", position)
+
         super.onSaveInstanceState(outState)
     }
 
     private fun setupRecyclerView() {
-        _recyclerView?.layoutManager = LinearLayoutManager(activity)
+
+        val layoutManager = LinearLayoutManager(activity)
+        _recyclerView?.layoutManager = layoutManager
         _recyclerView?.adapter = RecyclerViewAdapter(this)
+        _recyclerView?.layoutManager?.scrollToPosition(position)
+
+        _recyclerView?.addOnScrollListener(
+            object : RecyclerScrollListener(layoutManager, position) {
+                override fun onLoad(currentPosition: Int, totalCount: Int, view: RecyclerView?) {
+                    loadNextNotes(currentPosition)
+                }
+            }
+        )
+    }
+
+    fun loadNextNotes(currentPosition: Int) {
+        val limit =  currentPosition + offset
+        position = currentPosition
+        val notesContainer = containerUi?.getNotesContainer()
+        notesContainer?.loadNextPageAsync(limit)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -175,13 +202,18 @@ class ListNotesFragment : Fragment(), ItemsContainer<Note> {
     }
 
     fun updateListNotes() {
+        Log.d(tag, "UpdateListNotes")
         _recyclerView?.adapter?.notifyDataSetChanged()
+        val totalCount = _recyclerView?.layoutManager?.itemCount ?: 0
+        if (totalCount < position) {
+            loadNextNotes(position)
+        } else {
+            _recyclerView?.layoutManager?.scrollToPosition(position)
+        }
     }
 
     inner class UpdateBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(tag, "onReceive()")
-            val result = intent?.getBooleanExtra(EXTRA_THOUSANDS_NOTES, true)
             val notesContainer = containerUi?.getNotesContainer()
             notesContainer?.refreshDataAsync()
         }

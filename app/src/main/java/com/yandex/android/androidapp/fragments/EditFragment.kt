@@ -2,17 +2,12 @@ package com.yandex.android.androidapp.fragments
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.BroadcastReceiver
-
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
-
 import android.view.*
-
 import android.widget.EditText
 import android.widget.TextView
 import com.yandex.android.androidapp.*
@@ -44,8 +39,9 @@ class EditFragment : Fragment() {
 
     private val _tag : String = "EditFragment"
 
+    // region on Create
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(_tag, "onCreate()")
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
@@ -53,10 +49,8 @@ class EditFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.d(_tag, "onCreateView()")
 
         val rootView = inflater?.inflate(R.layout.fragment_edit, container, false)!!
-
         editTitle = rootView.findViewById(R.id.title_edit)
         editDescription = rootView.findViewById(R.id.description_edit)
         currentColor = rootView.findViewById(R.id.color_view)
@@ -64,7 +58,6 @@ class EditFragment : Fragment() {
         if (note != null)
             onEditMode()
         else onCreateMode()
-
 
         currentColor?.setOnClickListener {
             onChooseColor()
@@ -83,12 +76,18 @@ class EditFragment : Fragment() {
             throw IllegalStateException("Context should implement ContainerUI")
     }
 
+    // endregion
+
+    // region Send Result Action
+
     private fun sendNote() {
         val outIntent = Intent()
         outIntent.putExtra(EXTRA_NOTE, note)
         targetFragment.onActivityResult(targetRequestCode, Activity.RESULT_OK, outIntent)
         fragmentManager.popBackStack()
     }
+
+    // endregion
 
     // region Setup Menu
 
@@ -141,7 +140,6 @@ class EditFragment : Fragment() {
         this.editDescription?.setText(note?.description, TextView.BufferType.EDITABLE)
 
         noteColor = note?.color ?: DEFAULT_COLOR
-
         saveNote = {updateNote()}
 
     }
@@ -181,6 +179,8 @@ class EditFragment : Fragment() {
     }
 
     // endregion
+
+    // region Back Press Action
 
     private fun createBackPressDialog() : AlertDialog {
         val dialogBuilder = AlertDialog.Builder(activity)
@@ -223,5 +223,5 @@ class EditFragment : Fragment() {
             else -> fragmentManager.popBackStack()
         }
     }
-
+    // endregion
 }

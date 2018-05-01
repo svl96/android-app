@@ -24,14 +24,6 @@ class ColorPickerFragment : Fragment() {
     private var scrollLayout : LinearLayout? = null
 
     private var currentColorValue : Int = DEFAULT_COLOR
-    private val squareSideDP : Int = 50
-    private val squareMarginDP: Int = 25
-    private val squareCount: Int = 16
-    private val hueStep : Int = 60
-    private val backgroundSat : Float = .8F
-    private val backgroundBrightness : Float = 1F
-    private val squareSat : Float = 1F
-    private val squareBrightness = .95F
 
     companion object {
         @JvmStatic
@@ -45,14 +37,13 @@ class ColorPickerFragment : Fragment() {
         }
     }
 
+    // region On Create
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
-        if (savedInstanceState == null)
-            currentColorValue = arguments.getInt(EXTRA_COLOR)
-        else
-            currentColorValue = savedInstanceState.getInt("COLOR")
+        currentColorValue = savedInstanceState?.getInt("COLOR") ?: arguments.getInt(EXTRA_COLOR)
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -77,6 +68,8 @@ class ColorPickerFragment : Fragment() {
 
         super.onSaveInstanceState(outState)
     }
+
+    // endregion
 
     // region Setup Color View
 
@@ -153,6 +146,7 @@ class ColorPickerFragment : Fragment() {
     // region Draw Gradient Scroll
 
     private fun fillScrollBackground() {
+        val hueStep = resources.getInteger(R.integer.color_pick_hue_step)
         val drawable = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
                 getHSVGradientColors(hueStep))
 
@@ -161,7 +155,15 @@ class ColorPickerFragment : Fragment() {
     }
 
     private fun addColorRectanglesView() {
+        val squareCount = resources.getInteger(R.integer.color_pick_square_count)
+        val squareSideDP = resources.getInteger(R.integer.color_pick_square_side)
+        val squareMarginDP = resources.getInteger(R.integer.color_pick_square_margin)
         val hueValues = calcCenterHueValues(squareCount, squareSideDP, squareMarginDP)
+
+        val squareSat: Float = (resources
+                .getInteger(R.integer.color_pick_square_saturation) / 100.0).toFloat()
+        val squareBrightness: Float = (resources
+                .getInteger(R.integer.color_pick_square_brightness) / 100.0).toFloat()
 
         for (i in 1..squareCount) {
             val hsvColorBright = Color.HSVToColor(floatArrayOf(
@@ -169,7 +171,7 @@ class ColorPickerFragment : Fragment() {
                     squareSat,
                     squareBrightness
             ))
-            scrollLayout?.addView(createColorRectView(hsvColorBright))
+            scrollLayout?.addView(createColorRectView(hsvColorBright, squareSideDP, squareMarginDP))
         }
     }
 
@@ -180,6 +182,11 @@ class ColorPickerFragment : Fragment() {
 
     private fun getHSVGradientColors(hueStep : Int) : IntArray {
         val colorsList = mutableListOf<Int>()
+        val backgroundSat: Float = (resources
+                .getInteger(R.integer.color_pick_background_saturation) / 100.0).toFloat()
+        val backgroundBrightness: Float = (resources
+                .getInteger(R.integer.color_pick_background_brightness) / 100.0).toFloat()
+
         for (i in 0..360 step hueStep ) {
             val hueVal = i.toFloat()
             colorsList.add(Color.HSVToColor(
@@ -207,12 +214,11 @@ class ColorPickerFragment : Fragment() {
         return outHueValues.toTypedArray()
     }
 
-    private fun createColorRectView(color : Int) : View {
+    private fun createColorRectView(color : Int, squareSideDP: Int, squareMarginDP: Int) : View {
         val outRect = View(this.activity)
         val layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT)
         val displayMetrics = resources.displayMetrics
-
         val typedSquareSide = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 squareSideDP.toFloat(), displayMetrics).toInt()
         val typedSquareMargin = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,

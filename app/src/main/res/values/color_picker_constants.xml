@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="color_pick_square_side">50</integer>
+    <integer name="color_pick_square_margin">25</integer>
+    <integer name="color_pick_square_count">16</integer>
+    <integer name="color_pick_hue_step">60</integer>
+    <integer name="color_pick_background_saturation">80</integer>
+    <integer name="color_pick_background_brightness">100</integer>
+    <integer name="color_pick_square_saturation">100</integer>
+    <integer name="color_pick_square_brightness">95</integer>
+</resources>

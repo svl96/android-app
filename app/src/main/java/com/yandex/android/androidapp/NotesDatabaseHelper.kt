@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Color
 import android.provider.BaseColumns
+import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -39,6 +40,7 @@ class NotesDatabaseHelper(context: Context?)
         const val DEFAULT_FILTER_COLUMN = COLUMN_EDIT_TIME
         const val DESCENT_SORT_ORDER = "DESC"
         const val ASCENT_SORT_ORDER = "ASC"
+        const val DEFAULT_LIMIT = "100"
 
         const val DEFAULT_SORT_ORDER = DESCENT_SORT_ORDER
 
@@ -48,6 +50,7 @@ class NotesDatabaseHelper(context: Context?)
         const val SORT_ORDER_PARAM_KEY = "sort_order"
         const val START_DATE_PARAM_KEY = "start_date"
         const val END_DATE_PARM_KEY = "end_date"
+        const val LIMIT_KEY = "limit"
 
         // queries
         private const val SQL_CREATE_TABLE_NOTES = "CREATE TABLE $TABLE_NOTES " +
@@ -85,21 +88,20 @@ class NotesDatabaseHelper(context: Context?)
 
     private fun fillData(db: SQLiteDatabase?) {
         // добавление данных, возможно из assets
-        addNote(db, "testid1", "Note 1", "Descr 1", "#ff0000",
+        addNote(db, Note("testid1", "Note 1", "Descr 1", Color.RED,
                 Note.parseDate("2017-04-24T12:00:00.000+05:00")!!,
                 Note.parseDate("2017-04-24T12:20:00.000+05:00")!!,
-                Note.parseDate("2017-04-24T12:20:00.000+05:00")!!
+                Note.parseDate("2017-04-24T12:20:00.000+05:00")!!)
                 )
 
-        addNote(db,"testid2", "Note 2", "Descr 2", "#00ff00",
+        addNote(db,Note("testid2", "Note 2", "Descr 2", Color.BLUE,
                 Note.parseDate("2017-04-26T15:00:00.000+05:00")!!,
                 Note.parseDate("2017-04-26T15:20:00.000+05:00")!!,
-                Note.parseDate("2017-04-26T15:20:00.000+05:00")!!
+                Note.parseDate("2017-04-26T15:20:00.000+05:00")!!)
         )
     }
 
-    fun updateNote(note: Note) : Int {
-        val database = writableDatabase
+    private fun getContentValues(note: Note) : ContentValues {
         val contentValues = ContentValues(7)
         contentValues.put(COLUMN_NOTE_ID, note.id)
         contentValues.put(COLUMN_TITLE, note.title)
@@ -108,6 +110,13 @@ class NotesDatabaseHelper(context: Context?)
         contentValues.put(COLUMN_CREATE_TIME, note.timeCreate.time)
         contentValues.put(COLUMN_EDIT_TIME, note.timeEdit.time)
         contentValues.put(COLUMN_VIEW_TIME, note.timeView.time)
+
+        return contentValues
+    }
+
+    fun updateNote(note: Note) : Int {
+        val database = writableDatabase
+        val contentValues = getContentValues(note)
 
         val selection = "$COLUMN_NOTE_ID = ?"
         val selectionArgs = arrayOf(note.id)
@@ -132,24 +141,14 @@ class NotesDatabaseHelper(context: Context?)
         }
     }
 
-    private fun addNote(db: SQLiteDatabase?, noteId: String,
-                        title: String, description: String, color: String,
-                        timeCreate: Date, timeEdit: Date, timeView: Date
-                        ) {
-        val contentValues = ContentValues(7)
-        contentValues.put(COLUMN_NOTE_ID, noteId)
-        contentValues.put(COLUMN_TITLE, title)
-        contentValues.put(COLUMN_DESCRIPTION, description)
-        contentValues.put(COLUMN_COLOR, color)
-        contentValues.put(COLUMN_CREATE_TIME, timeCreate.time)
-        contentValues.put(COLUMN_EDIT_TIME, timeEdit.time)
-        contentValues.put(COLUMN_VIEW_TIME, timeView.time)
-        db?.insert(TABLE_NOTES, null, contentValues)
-    }
 
-    private fun addNote(db: SQLiteDatabase, note: Note) {
-        addNote(db, note.id, note.title, note.description, getHEXColor(note.color),
-                note.timeCreate, note.timeEdit, note.timeView)
+    private fun addNote(db: SQLiteDatabase?, note: Note) {
+        val contentValues = getContentValues(note)
+        if (db != null) {
+            db.insert(TABLE_NOTES, null, contentValues)
+        } else {
+            Log.e("DatabaseError", "NullPointException")
+        }
     }
 
     // endregion
@@ -187,7 +186,7 @@ class NotesDatabaseHelper(context: Context?)
     fun getAllNotes(sortColumn : String = DEFAULT_SORT_COLUMN,
                     sortOrder : String = DEFAULT_SORT_ORDER ) : Array<Note> {
         return getFilterByDateRangeNotes(sortColumn = sortColumn, sortOrder = sortOrder,
-                startDate = null, endDate = null)
+                startDate = null, endDate = null, limit = null)
     }
 
     fun getFilteredNotes(params : Map<String, String> ) : Array<Note> {
@@ -206,8 +205,10 @@ class NotesDatabaseHelper(context: Context?)
         val sortColumn: String = params[SORT_COLUMN_PARAM_KEY] ?: DEFAULT_SORT_COLUMN
         val filterColumn : String = params[FILTER_COLUMN_PARAM_KEY] ?: DEFAULT_FILTER_COLUMN
         val sortOrder : String = params[SORT_ORDER_PARAM_KEY] ?: DEFAULT_SORT_ORDER
+        val limit : String? = params[LIMIT_KEY]
 
-        return getFilterByDateRangeNotes(startDate, endDate, sortColumn, filterColumn, sortOrder)
+        return getFilterByDateRangeNotes(startDate, endDate, sortColumn,
+                filterColumn, sortOrder, limit)
 
     }
 
@@ -222,7 +223,9 @@ class NotesDatabaseHelper(context: Context?)
     fun getFilterByDateRangeNotes(startDate : Calendar?, endDate : Calendar?,
                                   sortColumn : String = DEFAULT_SORT_COLUMN,
                                   filterColumn : String = DEFAULT_FILTER_COLUMN,
-                                  sortOrder : String = DEFAULT_SORT_ORDER) : Array<Note> {
+                                  sortOrder : String = DEFAULT_SORT_ORDER,
+                                  limit : String? = null
+    ) : Array<Note> {
 
         val notes = mutableListOf<Note>()
 
@@ -246,7 +249,8 @@ class NotesDatabaseHelper(context: Context?)
                     selectionArgs,
                     null,
                     null,
-                    sortArg
+                    sortArg,
+                    limit
             )
             if (cursor.moveToFirst()) {
                 do {

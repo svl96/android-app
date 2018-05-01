@@ -5,9 +5,6 @@ import android.content.Context
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import com.yandex.android.androidapp.*
 
 
@@ -28,6 +25,8 @@ class DatabaseFragment : Fragment() {
 
     private var containerUi: ContainerUI? = null
     private var notesContainer: NotesContainerUI? = null
+
+    // region on Create
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -50,6 +49,10 @@ class DatabaseFragment : Fragment() {
         }
     }
 
+    // endregion
+
+    // region public functions interface
+
     fun deleteDataAsync(db: NotesDatabaseHelper, note: Note) {
         val task = DeleteDataTask(db)
         task.execute(note)
@@ -69,6 +72,10 @@ class DatabaseFragment : Fragment() {
         val task = GetDataTask(dbHelper, params)
         task.execute()
     }
+
+    // endregion
+
+    // region Async Classes
 
     @SuppressLint("StaticFieldLeak")
     private inner class UpdateDataTask(val dbHelper: NotesDatabaseHelper)
@@ -147,4 +154,5 @@ class DatabaseFragment : Fragment() {
         }
     }
 
+    // endregion
 }

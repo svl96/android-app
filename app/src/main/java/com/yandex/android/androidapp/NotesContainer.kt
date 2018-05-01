@@ -1,6 +1,6 @@
 package com.yandex.android.androidapp
 
-import android.content.Context
+import android.util.Log
 import com.yandex.android.androidapp.fragments.DatabaseFragment
 import java.util.*
 import kotlin.collections.HashMap
@@ -8,6 +8,16 @@ import kotlin.collections.HashMap
 
 class NotesContainer(private val databaseHelper: NotesDatabaseHelper,
                      private val databaseFragment: DatabaseFragment) : NotesContainerUI, AsyncNotesContainerUI {
+
+    private var _notes : Array<Note> = arrayOf()
+    private var offset = 20
+    private var startDate : Calendar? = null
+    private var endDate : Calendar? = null
+    private var filterBy : String = NotesDatabaseHelper.DEFAULT_FILTER_COLUMN
+    private var sortBy : String = NotesDatabaseHelper.DEFAULT_SORT_COLUMN
+    private var sortOrder : String = NotesDatabaseHelper.DEFAULT_SORT_ORDER
+
+
     override fun deleteNoteAsync(note: Note) {
         databaseFragment.deleteDataAsync(databaseHelper, note)
     }
@@ -29,13 +39,10 @@ class NotesContainer(private val databaseHelper: NotesDatabaseHelper,
         databaseFragment.getDataAsync(databaseHelper, params)
     }
 
-    private var _notes : Array<Note> = arrayOf()
-
-    private var startDate : Calendar? = null
-    private var endDate : Calendar? = null
-    private var filterBy : String = NotesDatabaseHelper.DEFAULT_FILTER_COLUMN
-    private var sortBy : String = NotesDatabaseHelper.DEFAULT_SORT_COLUMN
-    private var sortOrder : String = NotesDatabaseHelper.DEFAULT_SORT_ORDER
+    fun loadNextPageAsync(offset: Int) {
+        this.offset = offset
+        refreshDataAsync()
+    }
 
     fun setNotes(notes: Array<Note>) {
         _notes = notes
@@ -78,6 +85,7 @@ class NotesContainer(private val databaseHelper: NotesDatabaseHelper,
         params[NotesDatabaseHelper.SORT_ORDER_PARAM_KEY] = sortOrder
         params[NotesDatabaseHelper.FILTER_COLUMN_PARAM_KEY] = filterBy
         params[NotesDatabaseHelper.SORT_COLUMN_PARAM_KEY] = sortBy
+        params[NotesDatabaseHelper.LIMIT_KEY] = (offset).toString()
         if (startDate != null)
             params[NotesDatabaseHelper.START_DATE_PARAM_KEY] = Note.formatDate(startDate?.time)!!
 

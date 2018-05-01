@@ -37,9 +37,8 @@ class AboutAppFragment : Fragment() {
         containerUi?.setActivityTitle(R.string.about_app_title)
         val rootView = inflater?.inflate(R.layout.fragment_about_app, container, false)!!
 
-        val add1000NotesBtn = rootView.findViewById<Button>(R.id.add_1000_notes)
-
-        add1000NotesBtn.setOnClickListener { addNotes() }
+        val specialButton = rootView.findViewById<Button>(R.id.add_1000_notes)
+        specialButton.setOnClickListener { addNotes() }
 
         return rootView
     }

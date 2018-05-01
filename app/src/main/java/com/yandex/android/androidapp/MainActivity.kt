@@ -72,6 +72,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         setupDatabaseFragment()
 
         notesContainer = NotesContainer(databaseHelper!!, databaseFragment!!)
+        setupNewNotesContainer()
         updateData()
 
         if (savedInstanceState == null) {
@@ -141,7 +142,6 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
             supportFragmentManager
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment, tag)
-                    .addToBackStack(null)
                     .commit()
         }
         drawerLayout?.closeDrawer(GravityCompat.START)
@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
         val tag = "ImportExportFragment"
         var fragment = supportFragmentManager.findFragmentByTag(tag)
         if (fragment == null)
-            fragment = ImportExportFragmet.newInstance()
+            fragment = ImportExportFragment.newInstance()
 
         openSelectedFragment(tag, fragment)
         return true
@@ -236,20 +236,17 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
             notesContainer = NotesContainer(databaseHelper!!, databaseFragment!!)
         }
         notesContainer?.setNotes(items)
-
+        Log.d(tag, "updateDataCallback")
         val listFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
         if (listFragment is ListNotesFragment) {
             listFragment.updateListNotes()
         }
 
-
     }
 
-    override fun updateData() {
+    private fun setupNewNotesContainer() {
         val sharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
-
         val sortByColumn = getTimeColumn(SHARED_SORT_BY, NotesDatabaseHelper.DEFAULT_SORT_COLUMN)
-
         val filterByColumn = getTimeColumn(SHARED_FILTER_BY, NotesDatabaseHelper.DEFAULT_FILTER_COLUMN)
 
         val sortOrderParam = when(sharedPreferences?.getString(SHARED_SORT_ORDER, "")) {
@@ -268,9 +265,15 @@ class MainActivity : AppCompatActivity(), ContainerUI  {
 
         notesContainer?.setSelectParams(filterParam, filterParam,
                 sortByColumn, filterByColumn, sortOrderParam)
+    }
 
+    override fun updateData() {
+        Log.d(tag, "updateData")
+        if (notesContainer == null) {
+            notesContainer = NotesContainer(databaseHelper!!, databaseFragment!!)
+        }
+        setupNewNotesContainer()
         notesContainer?.refreshDataAsync()
-
     }
 
     override fun getNotesContainer(): NotesContainer {

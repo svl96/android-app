@@ -41,7 +41,7 @@ class ThousandsNotesService : IntentService("ThousandsNotes") {
         mNotifyBuilder?.setContentText("Write in Progress")
         mNotifyBuilder?.setSmallIcon(R.drawable.ic_alert)
         mNotifyBuilder?.setProgress(100, 0, false)
-        for (i in 1..50) {
+        for (i in 1..100) {
             writeNote(dbHelper, i)
             mNotifyBuilder?.setProgress(100, i, false)
             mNotifyManager?.notify(id, mNotifyBuilder?.build())
